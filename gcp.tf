@@ -71,7 +71,7 @@ resource "google_compute_instance" "vault_vm" {
       -e ICON_SERVICE=internal \
       -e ICON_CACHE_TTL=2592000 \
       -e ADMIN_TOKEN=$(gcloud secrets versions access latest --secret="admin_token_hash") \
-      vaultwarden/server:1.36.0
+      vaultwarden/server:${var.vaultwarden_server_version}
 
     sleep 10
 
@@ -80,7 +80,7 @@ resource "google_compute_instance" "vault_vm" {
       --name cloudflared \
       --restart always \
       --network vaultwarden-net \
-      cloudflare/cloudflared:2026.5.1 tunnel --no-autoupdate run --token ${data.cloudflare_zero_trust_tunnel_cloudflared_token.vault_tunnel.token}
+      cloudflare/cloudflared:${var.cloudflare_cloudflared_version} tunnel --no-autoupdate run --token $(gcloud secrets versions access latest --secret="vault_tunnel_token")
 
     # Launch the Offsite Backup Engine
     docker run -d \
@@ -98,7 +98,8 @@ resource "google_compute_instance" "vault_vm" {
       -e AWS_SECRET_ACCESS_KEY=$(gcloud secrets versions access latest --secret="r2_key") \
       -e S3_ENDPOINT="https://${var.cf_account_id}.r2.cloudflarestorage.com" \
       -e S3_BUCKET=${cloudflare_r2_bucket.vault_backup_bucket.name} \
-      ttionya/vaultwarden-backup:1.26.10
+      ttionya/vaultwarden-backup:${var.ttionya_vaultwarden_backup_version}
+
   EOT
 }
 

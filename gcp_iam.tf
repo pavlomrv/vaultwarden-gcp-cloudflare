@@ -5,6 +5,7 @@ locals {
     google_secret_manager_secret.r2_key.id,
     google_secret_manager_secret.backup_pass.id,
     google_secret_manager_secret.admin_token_hash.id,
+    google_secret_manager_secret.vault_tunnel_token.id,
   ]
 }
 
@@ -14,6 +15,14 @@ resource "google_secret_manager_secret_iam_member" "vm_secret_access" {
   secret_id = each.value
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+
+  depends_on = [
+    google_secret_manager_secret_version.r2_key_val,
+    google_secret_manager_secret_version.r2_key_id_val,
+    google_secret_manager_secret_version.backup_pass_val,
+    google_secret_manager_secret_version.admin_token_hash_val,
+    google_secret_manager_secret_version.vault_tunnel_token_val,
+  ]
 }
 
 # -------- Secrets --------
@@ -72,5 +81,16 @@ resource "google_secret_manager_secret_version" "admin_token_hash_val" {
   secret_data_wo_version = "1"
 }
 
-
-
+# --------
+resource "google_secret_manager_secret" "vault_tunnel_token" {
+  secret_id = "vault_tunnel_token"
+  replication {
+    auto {}
+  }
+}
+resource "google_secret_manager_secret_version" "vault_tunnel_token_val" {
+  secret                 = google_secret_manager_secret.vault_tunnel_token.id
+  secret_data_wo         = data.cloudflare_zero_trust_tunnel_cloudflared_token.vault_tunnel.token
+  deletion_policy        = "DISABLE"
+  secret_data_wo_version = "1"
+}

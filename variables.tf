@@ -8,7 +8,6 @@ variable "zone" { default = "us-east1-b" }
 variable "gcp_project_id" { sensitive = true }
 variable "service_account" { sensitive = true }
 
-
 # Cloudflare
 variable "cf_domain" {}
 variable "cf_api_token" { sensitive = true }
@@ -16,3 +15,8 @@ variable "cf_account_id" { sensitive = true }
 variable "cf_zone_id" { sensitive = true }
 variable "r2_key_id" { sensitive = true }
 variable "r2_key" { sensitive = true }
+
+# Etc
+variable "vaultwarden_server_version" { default = "1.36.0" }
+variable "cloudflare_cloudflared_version" { default = "2026.5.1" }
+variable "ttionya_vaultwarden_backup_version" { default = "1.26.10" }
