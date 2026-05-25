@@ -2,5 +2,4 @@ terraform.tfvars
 *.tfstate.backup
 *.tfstate
 .terraform
-.terraform.lock.hcl
 .idea

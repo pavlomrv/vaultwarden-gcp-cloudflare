@@ -31,7 +31,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vault_tunnel_config"
     ingress = [
       {
         hostname = "warden.${var.cf_domain}"
-        service  = "http://localhost:80" # Routes to local port 80 on your GCP VM
+        service  = "http://vaultwarden:80" # Routes to vaultwarden container
 
         origin_request = {
           connect_timeout          = 30
