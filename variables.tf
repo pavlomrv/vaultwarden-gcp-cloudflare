@@ -20,3 +20,6 @@ variable "r2_key" { sensitive = true }
 variable "vaultwarden_server_version" { default = "1.36.0" }
 variable "cloudflare_cloudflared_version" { default = "2026.5.1" }
 variable "ttionya_vaultwarden_backup_version" { default = "1.26.10" }
+variable "domain_hostname" { default = "warden.${var.cf_domain}" }
+variable "backup_chron" { default = "0 2 * * *" }
+variable "backup_keep_days" { default = "30" }

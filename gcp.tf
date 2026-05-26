@@ -55,52 +55,15 @@ resource "google_compute_instance" "vault_vm" {
   ]
 
   # Docker startup execution
-  metadata_startup_script = <<-EOT
-    #!/bin/bash
-    mkdir -p /var/vaultwarden/data
-    docker network create vaultwarden-net
-
-    # Launch Vaultwarden
-    docker run -d \
-      --name vaultwarden \
-      --restart always \
-      --network vaultwarden-net \
-      -v /var/vaultwarden/data:/data \
-      -e SIGNUPS_ALLOWED=false \
-      -e WEBSOCKET_ENABLED=true \
-      -e ICON_SERVICE=internal \
-      -e ICON_CACHE_TTL=2592000 \
-      -e ADMIN_TOKEN=$(gcloud secrets versions access latest --secret="admin_token_hash") \
-      vaultwarden/server:${var.vaultwarden_server_version}
-
-    sleep 10
-
-    # Launch Cloudflare Tunnel (Connects out to CF, routes to vaultwarden container)
-    docker run -d \
-      --name cloudflared \
-      --restart always \
-      --network vaultwarden-net \
-      cloudflare/cloudflared:${var.cloudflare_cloudflared_version} tunnel --no-autoupdate run --token $(gcloud secrets versions access latest --secret="vault_tunnel_token")
-
-    # Launch the Offsite Backup Engine
-    docker run -d \
-      --name vaultwarden_backup \
-      --restart always \
-      --network vaultwarden-net \
-      -v /var/vaultwarden/data:/data \
-      -e DATA_DIR=/data \
-      -e ZIP_TYPE=zip \
-      -e CRON_EXPRESSION="0 2 * * *" \
-      -e BACKUP_KEEP_DAYS=30 \
-      -e BACKUP_ENCRYPTION_KEY=$(gcloud secrets versions access latest --secret="backup_pass") \
-      -e STORAGE_TYPE=s3 \
-      -e AWS_ACCESS_KEY_ID=$(gcloud secrets versions access latest --secret="r2_key_id") \
-      -e AWS_SECRET_ACCESS_KEY=$(gcloud secrets versions access latest --secret="r2_key") \
-      -e S3_ENDPOINT="https://${var.cf_account_id}.r2.cloudflarestorage.com" \
-      -e S3_BUCKET=${cloudflare_r2_bucket.vault_backup_bucket.name} \
-      ttionya/vaultwarden-backup:${var.ttionya_vaultwarden_backup_version}
-
-  EOT
+  metadata_startup_script = templatefile("${path.module}/instance_startup.sh.tftpl", {
+    vaultwarden_server_version = var.vaultwarden_server_version
+    cloudflared_version        = var.cloudflare_cloudflared_version
+    vaultwarden_backup_version = var.ttionya_vaultwarden_backup_version
+    cf_account_id              = var.cf_account_id
+    backup_bucket_name         = cloudflare_r2_bucket.vault_backup_bucket.name
+    backup_chron               = var.backup_chron
+    backup_keep_days           = var.backup_keep_days
+  })
 }
 
 # -------- Enable GCP services

@@ -8,7 +8,7 @@ resource "cloudflare_ruleset" "vaultwarden_cache" {
 
   rules = [{
     description = "Cache static UI files for 1 month"
-    expression  = "(http.host eq \"warden.${var.cf_domain}\" and starts_with(http.request.uri.path, \"/web-vault/\"))"
+    expression  = "(http.host eq \"${var.domain_hostname}\" and starts_with(http.request.uri.path, \"/web-vault/\"))"
     action      = "set_cache_settings"
     enabled     = true
 

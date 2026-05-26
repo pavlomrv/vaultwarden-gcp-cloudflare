@@ -30,7 +30,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vault_tunnel_config"
   config = {
     ingress = [
       {
-        hostname = "warden.${var.cf_domain}"
+        hostname = var.domain_hostname
         service  = "http://vaultwarden:80" # Routes to vaultwarden container
 
         origin_request = {
