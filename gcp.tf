@@ -55,13 +55,13 @@ resource "google_compute_instance" "vault_vm" {
   ]
 
   # Docker startup execution
-  metadata_startup_script = templatefile("${path.module}/instance_startup.sh.tftpl", {
+  metadata_startup_script = templatefile("${path.module}/scripts/instance_startup.sh.tftp", {
     vaultwarden_server_version = var.vaultwarden_server_version
     cloudflared_version        = var.cloudflare_cloudflared_version
     vaultwarden_backup_version = var.ttionya_vaultwarden_backup_version
     cf_account_id              = var.cf_account_id
     backup_bucket_name         = cloudflare_r2_bucket.vault_backup_bucket.name
-    backup_chron               = var.backup_chron
+    backup_chron               = var.backup_cron
     backup_keep_days           = var.backup_keep_days
   })
 }

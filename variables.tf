@@ -9,7 +9,8 @@ variable "gcp_project_id" { sensitive = true }
 variable "service_account" { sensitive = true }
 
 # Cloudflare
-variable "cf_domain" {}
+variable "cf_domain" {}       # 'domain.com'
+variable "domain_hostname" {} # basically a subdomain, like 'vault.domain.com'
 variable "cf_api_token" { sensitive = true }
 variable "cf_account_id" { sensitive = true }
 variable "cf_zone_id" { sensitive = true }
@@ -20,6 +21,5 @@ variable "r2_key" { sensitive = true }
 variable "vaultwarden_server_version" { default = "1.36.0" }
 variable "cloudflare_cloudflared_version" { default = "2026.5.1" }
 variable "ttionya_vaultwarden_backup_version" { default = "1.26.10" }
-variable "domain_hostname" { default = "warden.${var.cf_domain}" }
-variable "backup_chron" { default = "0 2 * * *" }
+variable "backup_cron" { default = "0 2 * * *" }
 variable "backup_keep_days" { default = "30" }
