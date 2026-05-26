@@ -1,0 +1,43 @@
+#!/bin/bash
+mkdir -p /var/vaultwarden/data
+docker network create vaultwarden-net
+
+# Launch Vaultwarden
+docker run -d \
+  --name vaultwarden \
+  --restart always \
+  --network vaultwarden-net \
+  -v /var/vaultwarden/data:/data \
+  -e SIGNUPS_ALLOWED=false \
+  -e WEBSOCKET_ENABLED=true \
+  -e ICON_SERVICE=internal \
+  -e ICON_CACHE_TTL=2592000 \
+  -e ADMIN_TOKEN="$(gcloud secrets versions access latest --secret="admin_token_hash")" \
+  vaultwarden/server:"${vaultwarden_server_version}"
+
+sleep 10
+
+# Launch Cloudflare Tunnel (Connects out to CF, routes to vaultwarden container)
+docker run -d \
+  --name cloudflared \
+  --restart always \
+  --network vaultwarden-net \
+  cloudflare/cloudflared:${cloudflared_version} tunnel --no-autoupdate run --token "$(gcloud secrets versions access latest --secret="vault_tunnel_token")"
+
+# Launch the Offsite Backup Engine
+docker run -d \
+  --name vaultwarden_backup \
+  --restart always \
+  --network vaultwarden-net \
+  -v /var/vaultwarden/data:/data \
+  -e DATA_DIR=/data \
+  -e ZIP_TYPE=zip \
+  -e CRON_EXPRESSION="${backup_chron}" \
+  -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
+  -e BACKUP_ENCRYPTION_KEY="$(gcloud secrets versions access latest --secret="backup_pass")" \
+  -e STORAGE_TYPE=s3 \
+  -e AWS_ACCESS_KEY_ID="$(gcloud secrets versions access latest --secret="r2_key_id")" \
+  -e AWS_SECRET_ACCESS_KEY="$(gcloud secrets versions access latest --secret="r2_key")" \
+  -e S3_ENDPOINT="https://${cf_account_id}.r2.cloudflarestorage.com" \
+  -e S3_BUCKET="${backup_bucket_name}" \
+  ttionya/vaultwarden-backup:"${vaultwarden_backup_version}"
