@@ -55,7 +55,7 @@ resource "google_compute_instance" "vault_vm" {
   ]
 
   # Docker startup execution
-  metadata_startup_script = templatefile("${path.module}/scripts/instance_startup.sh.tftp", {
+  metadata_startup_script = templatefile("${path.module}/scripts/instance_startup.sh.tftpl", {
     vaultwarden_server_version = var.vaultwarden_server_version
     cloudflared_version        = var.cloudflare_cloudflared_version
     vaultwarden_backup_version = var.ttionya_vaultwarden_backup_version

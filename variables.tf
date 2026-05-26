@@ -10,7 +10,7 @@ variable "service_account" { sensitive = true }
 
 # Cloudflare
 variable "cf_domain" {}       # 'domain.com'
-variable "domain_hostname" {} # basically a subdomain, like 'vault.domain.com'
+variable "cf_subdomain" {} # basically a subdomain, like 'vault in 'vault.domain.com'
 variable "cf_api_token" { sensitive = true }
 variable "cf_account_id" { sensitive = true }
 variable "cf_zone_id" { sensitive = true }

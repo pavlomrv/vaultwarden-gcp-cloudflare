@@ -2,7 +2,7 @@
 # Route traffic from the domain to the Tunnel
 resource "cloudflare_dns_record" "vault_dns" {
   zone_id = var.cf_zone_id
-  name    = split(".", var.domain_hostname)[0] # Creates a subdomain, like 'vault.domain.com'
+  name    = var.cf_subdomain # Creates a subdomain, like 'vault.domain.com'
   content = "${cloudflare_zero_trust_tunnel_cloudflared.vault_tunnel.id}.cfargotunnel.com"
   type    = "CNAME"
   proxied = true # Keeps your GCP IP hidden and enables DDoS protection
@@ -30,8 +30,8 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vault_tunnel_config"
   config = {
     ingress = [
       {
-        hostname = var.domain_hostname
-        service  = "http://vaultwarden:80" # Routes to vaultwarden container
+        hostname = "${var.cf_subdomain}.${var.cf_domain}" # e.g. 'vault.domain.com'
+        service  = "http://vaultwarden:80"                # Routes to vaultwarden container
 
         origin_request = {
           connect_timeout          = 30

@@ -2,7 +2,21 @@
 mkdir -p /var/vaultwarden/data
 docker network create vaultwarden-net
 
+get_secret() {
+ local name="$1"
+ local token
+ token="$(curl -sf -H "Metadata-Flavor: Google" \
+   "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
+   | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')"
+
+ curl -sf -H "Authorization: Bearer ${token}" \
+   "https://secretmanager.googleapis.com/v1/projects/${gcp_project_id}/secrets/${name}/versions/latest:access" \
+   | sed -n 's/.*"data":"\([^"]*\)".*/\1/p' \
+   | base64 -d
+}
+
 # Launch Vaultwarden
+# Add  "-e DISABLE_ICON_DOWNLOAD=true \"  # in case you need to disable icons to save traffic
 docker run -d \
   --name vaultwarden \
   --restart always \
@@ -12,8 +26,7 @@ docker run -d \
   -e WEBSOCKET_ENABLED=true \
   -e ICON_SERVICE=internal \
   -e ICON_CACHE_TTL=2592000 \
-#  -e DISABLE_ICON_DOWNLOAD=true \  # in case you need to disable icons to save traffic
-  -e ADMIN_TOKEN="$(gcloud secrets versions access latest --secret="admin_token_hash")" \
+  -e ADMIN_TOKEN="$(get_secret admin_token_hash)" \
   vaultwarden/server:"${vaultwarden_server_version}"
 
 sleep 10
@@ -23,7 +36,7 @@ docker run -d \
   --name cloudflared \
   --restart always \
   --network vaultwarden-net \
-  cloudflare/cloudflared:${cloudflared_version} tunnel --no-autoupdate run --token "$(gcloud secrets versions access latest --secret="vault_tunnel_token")"
+  cloudflare/cloudflared:${cloudflared_version} tunnel --no-autoupdate run --token "$(get_secret vault_tunnel_token)"
 
 # Launch the Offsite Backup Engine
 docker run -d \
@@ -35,10 +48,10 @@ docker run -d \
   -e ZIP_TYPE=zip \
   -e CRON_EXPRESSION="${backup_chron}" \
   -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
-  -e BACKUP_ENCRYPTION_KEY="$(gcloud secrets versions access latest --secret="backup_pass")" \
+  -e BACKUP_ENCRYPTION_KEY="$(get_secret "backup_pass")" \
   -e STORAGE_TYPE=s3 \
-  -e AWS_ACCESS_KEY_ID="$(gcloud secrets versions access latest --secret="r2_key_id")" \
-  -e AWS_SECRET_ACCESS_KEY="$(gcloud secrets versions access latest --secret="r2_key")" \
+  -e AWS_ACCESS_KEY_ID="$(get_secret r2_key_id)" \
+  -e AWS_SECRET_ACCESS_KEY="$(get_secret r2_key)" \
   -e S3_ENDPOINT="https://${cf_account_id}.r2.cloudflarestorage.com" \
   -e S3_BUCKET="${backup_bucket_name}" \
   ttionya/vaultwarden-backup:"${vaultwarden_backup_version}"
