@@ -34,7 +34,7 @@ resource "google_secret_manager_secret" "r2_key_id" {
 }
 resource "google_secret_manager_secret_version" "r2_key_id_val" {
   secret                 = google_secret_manager_secret.r2_key_id.id
-  secret_data_wo         = var.r2_key_id
+  secret_data_wo         = var.cf_r2_key_id
   deletion_policy        = "DISABLE"
   secret_data_wo_version = "1"
 }
@@ -48,7 +48,7 @@ resource "google_secret_manager_secret" "r2_key" {
 }
 resource "google_secret_manager_secret_version" "r2_key_val" {
   secret                 = google_secret_manager_secret.r2_key.id
-  secret_data_wo         = var.r2_key
+  secret_data_wo         = var.cf_r2_key
   deletion_policy        = "DISABLE"
   secret_data_wo_version = "1"
 }
@@ -62,7 +62,7 @@ resource "google_secret_manager_secret" "backup_pass" {
 }
 resource "google_secret_manager_secret_version" "backup_pass_val" {
   secret                 = google_secret_manager_secret.backup_pass.id
-  secret_data_wo         = var.backup_password
+  secret_data_wo         = var.vw_backup_password
   deletion_policy        = "DISABLE"
   secret_data_wo_version = "1"
 }
@@ -76,7 +76,7 @@ resource "google_secret_manager_secret" "admin_token_hash" {
 }
 resource "google_secret_manager_secret_version" "admin_token_hash_val" {
   secret                 = google_secret_manager_secret.admin_token_hash.id
-  secret_data_wo         = var.admin_token_hash
+  secret_data_wo         = var.vw_admin_token_hash
   deletion_policy        = "DISABLE"
   secret_data_wo_version = "1"
 }

@@ -16,16 +16,17 @@ terraform {
     }
   }
   backend "gcs" {
-    bucket = "vaultwarden-tfstate"
-    prefix = "terraform/state"
+    bucket                      = var.gcs_bucket
+    prefix                      = var.gcs_prefix
+    impersonate_service_account = "${var.gcs_service_account_id}@${var.gcp_project_id}.iam.gserviceaccount.com"
   }
 }
 
 provider "google" {
   project                     = var.gcp_project_id
-  region                      = var.region
-  zone                        = var.zone
-  impersonate_service_account = var.service_account
+  region                      = var.gcp_region
+  zone                        = var.gcp_zone
+  impersonate_service_account = var.gcp_service_account
 }
 
 provider "cloudflare" {
