@@ -1,6 +1,3 @@
-# Get the Default Compute Service Account
-data "google_compute_default_service_account" "default" {}
-
 # Get Cloudflare tunnel id
 data "cloudflare_zero_trust_tunnel_cloudflared_token" "vault_tunnel" {
   account_id = cloudflare_zero_trust_tunnel_cloudflared.vault_tunnel.account_id
@@ -42,7 +39,7 @@ resource "google_compute_instance" "vault_vm" {
   }
 
   service_account {
-    email  = data.google_compute_default_service_account.default.email
+    email  = google_service_account.vaultwarden_vm_sa.email
     scopes = ["cloud-platform"]
   }
 

@@ -10,11 +10,16 @@ locals {
 }
 
 # -------- Reader Role Update --------
+resource "google_service_account" "vaultwarden_vm_sa" {
+  account_id   = "vaultwarden-vm-sa"
+  display_name = "Vaultwarden VM Identity"
+}
+
 resource "google_secret_manager_secret_iam_member" "vm_secret_access" {
   for_each  = toset(local.gcp_secrets)
   secret_id = each.value
   role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  member    = "serviceAccount:${google_service_account.vaultwarden_vm_sa.email}"
 
   depends_on = [
     google_secret_manager_secret_version.r2_key_val,
