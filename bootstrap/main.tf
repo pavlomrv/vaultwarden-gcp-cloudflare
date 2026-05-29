@@ -1,4 +1,6 @@
 terraform {
+  required_version = "~> 1.15.1"
+
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -15,10 +17,9 @@ provider "google" {
 variable "gcp_project_id" {}
 variable "region" { default = "us-east1" }
 variable "tfstate_bucket" { default = "vaultwarden-tfstate" }
-variable "terraform_state_impersonators" {
-  type = set(string)
-}
+variable "terraform_state_impersonators" { type = set(string) }
 
+# -------- tfstate bucket
 resource "google_storage_bucket" "tfstate" {
   name                        = var.tfstate_bucket
   location                    = var.region
@@ -42,6 +43,7 @@ resource "google_storage_bucket" "tfstate" {
   }
 }
 
+# -------- IAM stuff
 resource "google_service_account" "terraform_state" {
   account_id   = "terraform-state"
   display_name = "Terraform state bucket access"
@@ -58,4 +60,36 @@ resource "google_service_account_iam_member" "terraform_state_impersonators" {
   member             = each.value
   service_account_id = google_service_account.terraform_state.name
   role               = "roles/iam.serviceAccountTokenCreator"
+}
+
+# -------- Enable GCP services
+resource "google_project_service" "compute_api" {
+  project            = var.gcp_project_id
+  service            = "compute.googleapis.com"
+  disable_on_destroy = false
+}
+resource "google_project_service" "secret_manager_api" {
+  project            = var.gcp_project_id
+  service            = "secretmanager.googleapis.com"
+  disable_on_destroy = false
+}
+resource "google_project_service" "iam_credentials" {
+  project                    = var.gcp_project_id
+  service                    = "iamcredentials.googleapis.com"
+  disable_on_destroy         = false
+  disable_dependent_services = false
+}
+
+# -------- Outputs
+output "backend_bucket_name" {
+  description = "The exact name of the GCS bucket to use in your backend config."
+  value       = google_storage_bucket.tfstate.name
+}
+output "backend_impersonate_service_account" {
+  description = "The exact service account email to use for backend impersonation."
+  value       = google_service_account.terraform_state.email
+}
+output "authorized_impersonators" {
+  description = "The list of users/identities authorized to impersonate the state service account."
+  value       = var.terraform_state_impersonators
 }

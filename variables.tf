@@ -9,10 +9,6 @@ variable "gcp_region" { default = "us-east1" }
 variable "gcp_zone" { default = "us-east1-b" }
 variable "gcp_project_id" { sensitive = true }
 variable "gcp_service_account" { sensitive = true }
-## GCS Backend bucket
-variable "gcs_bucket" {}
-variable "gcs_prefix" {}
-variable "gcs_service_account_id" {}
 
 # Cloudflare
 variable "cf_domain" {}    # 'domain.com'

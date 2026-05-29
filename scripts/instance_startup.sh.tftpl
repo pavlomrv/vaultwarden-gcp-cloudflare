@@ -40,7 +40,7 @@ docker run -d \
   --name cloudflared \
   --restart always \
   --network vaultwarden-net \
-  cloudflare/cloudflared:${cloudflared_version} tunnel --no-autoupdate run --token "$(get_secret vault_tunnel_token)"
+  cloudflare/cloudflared:${cloudflared_version} tunnel --no-autoupdate run --token "$(get_secret vault_tunnel_token || { sleep 10; get_secret vault_tunnel_token; })"
 
 # Launch the Offsite Backup Engine
 docker run -d \

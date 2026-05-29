@@ -44,9 +44,6 @@ resource "google_compute_instance" "vault_vm" {
   }
 
   depends_on = [
-    google_project_service.compute_api,
-    google_project_service.secret_manager_api,
-
     google_secret_manager_secret_iam_member.vm_secret_access,
     cloudflare_zero_trust_tunnel_cloudflared.vault_tunnel,
   ]
@@ -62,14 +59,4 @@ resource "google_compute_instance" "vault_vm" {
     backup_keep_days           = var.vw_backup_keep_days
     gcp_project_id             = var.gcp_project_id
   })
-}
-
-# -------- Enable GCP services
-resource "google_project_service" "compute_api" {
-  service            = "compute.googleapis.com"
-  disable_on_destroy = false
-}
-resource "google_project_service" "secret_manager_api" {
-  service            = "secretmanager.googleapis.com"
-  disable_on_destroy = false
 }
