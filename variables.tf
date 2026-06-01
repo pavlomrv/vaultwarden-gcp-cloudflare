@@ -2,7 +2,7 @@
 variable "vw_admin_token_hash" { sensitive = true }
 variable "vw_backup_password" { sensitive = true }
 variable "vw_backup_cron" { default = "0 2 * * *" }
-variable "vw_backup_keep_days" { default = "30" }
+variable "vw_backup_keep_days" { default = "180" }
 
 # GCP
 variable "gcp_region" { default = "us-east1" }

@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 7"
     }
+    # cloudflare = {
+    #   source  = "cloudflare/cloudflare"
+    #   version = "~> 5"
+    # }
   }
 }
 
@@ -48,19 +52,19 @@ resource "google_service_account" "terraform_state" {
   account_id   = "terraform-state"
   display_name = "Terraform state bucket access"
 }
-
 resource "google_storage_bucket_iam_member" "terraform_state_object_admin" {
   bucket = google_storage_bucket.tfstate.name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.terraform_state.email}"
 }
-
 resource "google_service_account_iam_member" "terraform_state_impersonators" {
   for_each           = var.terraform_state_impersonators
   member             = each.value
   service_account_id = google_service_account.terraform_state.name
   role               = "roles/iam.serviceAccountTokenCreator"
 }
+
+# -------- Cloudflare api token here? TODO
 
 # -------- Enable GCP services
 resource "google_project_service" "compute_api" {

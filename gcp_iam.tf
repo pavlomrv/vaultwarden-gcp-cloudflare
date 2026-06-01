@@ -1,12 +1,12 @@
 # -------- List --------
 locals {
-  gcp_secrets = [
-    google_secret_manager_secret.r2_key_id.id,
-    google_secret_manager_secret.r2_key.id,
-    google_secret_manager_secret.backup_pass.id,
-    google_secret_manager_secret.admin_token_hash.id,
-    google_secret_manager_secret.vault_tunnel_token.id,
-  ]
+  gcp_secrets = {
+    "r2_key_id"          = google_secret_manager_secret.r2_key_id.id,
+    "r2_key"             = google_secret_manager_secret.r2_key.id,
+    "backup_pass"        = google_secret_manager_secret.backup_pass.id,
+    "admin_token_hash"   = google_secret_manager_secret.admin_token_hash.id,
+    "vault_tunnel_token" = google_secret_manager_secret.vault_tunnel_token.id,
+  }
 }
 
 # -------- Reader Role Update --------
@@ -14,20 +14,11 @@ resource "google_service_account" "vaultwarden_vm_sa" {
   account_id   = "vaultwarden-vm-sa"
   display_name = "Vaultwarden VM Identity"
 }
-
 resource "google_secret_manager_secret_iam_member" "vm_secret_access" {
-  for_each  = toset(local.gcp_secrets)
+  for_each  = local.gcp_secrets
   secret_id = each.value
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.vaultwarden_vm_sa.email}"
-
-  depends_on = [
-    google_secret_manager_secret_version.r2_key_val,
-    google_secret_manager_secret_version.r2_key_id_val,
-    google_secret_manager_secret_version.backup_pass_val,
-    google_secret_manager_secret_version.admin_token_hash_val,
-    google_secret_manager_secret_version.vault_tunnel_token_val,
-  ]
 }
 
 # -------- Secrets --------
