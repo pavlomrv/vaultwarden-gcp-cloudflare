@@ -1,7 +1,7 @@
 # VaultWarden
 variable "vw_admin_token_hash" { sensitive = true }
 variable "vw_backup_password" { sensitive = true }
-variable "vw_backup_cron" { default = "0 2 * * *" }
+variable "vw_backup_cron" { default = "0 20 * * *" } # its in (ET), so here its ~3am
 variable "vw_backup_keep_days" { default = "180" }
 
 # GCP
