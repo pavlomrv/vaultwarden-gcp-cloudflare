@@ -64,8 +64,52 @@ resource "google_service_account_iam_member" "terraform_state_impersonators" {
   role               = "roles/iam.serviceAccountTokenCreator"
 }
 
-# -------- Cloudflare api token here? TODO
-
+# # -------- Cloudflare api token here? TODO
+# ⚠️ The Ultimate R2 "Gotcha" in Terraform
+#
+# There is a huge architectural distinction that trips up a lot of self-hosters here:
+#
+# The ttionya/vaultwarden-backup container relies on rclone under the hood, which interacts with R2 using the S3-compatible API. To do this, it absolutely requires an S3 Access Key ID and an S3 Secret Access Key.
+#
+# The standard cloudflare_api_token resource in Terraform (even in v5) cannot generate or export S3-compatible Access Keys. It can only generate tokens meant for the native Cloudflare HTTP API (like creating or deleting an entire bucket container).
+#
+# What this means for you:
+# If your ttionya container is successfully talking to R2 right now, you almost certainly did not create those keys via Terraform. You likely generated them manually in the Cloudflare Dashboard under R2 > Manage R2 API Tokens, where Cloudflare explicitly hands you an S3 Access Key Pair.
+#
+# To double-check those permissions, skip the Terraform code entirely and head to your Cloudflare Web Console to ensure that specific token is marked as Object Read & Write.
+# data "cloudflare_api_token_permissions_groups_list" "all" {}
+#
+# # In v5, look to see if you are parsing the list for "Write" strings
+# locals {
+#   r2_write_id = element([
+#     for g in data.cloudflare_api_token_permissions_groups_list.all.result : g.id
+#     if g.name == "Workers R2 Storage Bucket Item Write"
+#   ], 0)
+# }
+# resource "cloudflare_api_token" "vaultwarden_backup_token" {
+#   name = "vaultwarden-r2-backup-token"
+#
+#   # v5 uses the 'policies' list of objects
+#   policies = [{
+#     effect = "allow"
+#
+#     # You must look for these permission group IDs
+#     permission_groups = [
+#       {
+#         # Example UUID for R2 Bucket Item Write
+#         id = "7f7bc863dc364f9b93e4bf4753be62e4"
+#       },
+#       {
+#         # Example UUID for R2 Bucket Item Read
+#         id = "c31671e9a3b64c7e8d8ee27e573e86c0"
+#       }
+#     ]
+#
+#     resources = {
+#       "com.cloudflare.edge.r2.bucket.*" = "*"
+#     }
+#   }]
+# }
 # -------- Enable GCP services
 resource "google_project_service" "compute_api" {
   project            = var.gcp_project_id
