@@ -34,7 +34,7 @@ resource "google_compute_instance" "vault_vm" {
     network = "default"
 
     access_config {
-      // Ephemeral public IP
+      # Ephemeral public IP
     }
   }
 

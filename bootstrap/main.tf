@@ -18,10 +18,16 @@ provider "google" {
   region  = var.region
 }
 
-variable "gcp_project_id" {}
-variable "region" { default = "us-east1" }
-variable "tfstate_bucket" { default = "vaultwarden-tfstate" }
+variable "gcp_project_id" { type = string }
 variable "terraform_state_impersonators" { type = set(string) }
+variable "region" {
+  type    = string
+  default = "us-east1"
+}
+variable "tfstate_bucket" {
+  type    = string
+  default = "vaultwarden-tfstate"
+}
 
 # -------- tfstate bucket
 resource "google_storage_bucket" "tfstate" {
