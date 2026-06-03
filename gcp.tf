@@ -60,9 +60,9 @@ resource "google_compute_instance" "vault_vm" {
     cloudflared_version        = var.cloudflare_cloudflared_version
     vaultwarden_backup_version = var.ttionya_vaultwarden_backup_version
     cf_account_id              = var.cf_account_id
-    backup_bucket_name         = cloudflare_r2_bucket.vault_backup_bucket.name
-    backup_chron               = var.vw_backup_cron
-    backup_keep_days           = var.vw_backup_keep_days
-    gcp_project_id             = var.gcp_project_id
+    # backup_bucket_name         = cloudflare_r2_bucket.vault_backup_bucket.name
+    backup_chron     = var.vw_backup_cron
+    backup_keep_days = var.vw_backup_keep_days
+    gcp_project_id   = var.gcp_project_id
   })
 }

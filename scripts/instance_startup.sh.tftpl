@@ -20,7 +20,7 @@ get_secret() {
 }
 
 # Launch Vaultwarden
-# Add  "-e DISABLE_ICON_DOWNLOAD=true \"  # in case you need to disable icons to save traffic
+# Add  "-e DISABLE_ICON_DOWNLOAD=true \" in case you need to disable icons to save traffic
 docker run -d \
   --name vaultwarden \
   --restart always \
@@ -30,7 +30,7 @@ docker run -d \
   -e WEBSOCKET_ENABLED=true \
   -e ICON_SERVICE=internal \
   -e ICON_CACHE_TTL=2592000 \
-  -e ADMIN_TOKEN="$(get_secret admin_token_hash || { sleep 10; get_secret admin_token_hash; } )" \
+  -e ADMIN_TOKEN="$(get_secret admin_token_hash)" \
   vaultwarden/server:"${vaultwarden_server_version}"
 
 sleep 10
@@ -40,22 +40,34 @@ docker run -d \
   --name cloudflared \
   --restart always \
   --network vaultwarden-net \
-  cloudflare/cloudflared:${cloudflared_version} tunnel --no-autoupdate run --token "$(get_secret vault_tunnel_token || { sleep 10; get_secret vault_tunnel_token; })"
+  cloudflare/cloudflared:${cloudflared_version} tunnel --no-autoupdate run --token "$(get_secret vault_tunnel_token)"
+
+# rclone config for backup container
+mkdir -p /var/vaultwarden-backup
+touch /var/vaultwarden-backup/rclone.conf
+chmod 600 /var/vaultwarden-backup/rclone.conf
+set +x 2>/dev/null # Temporarily disable command tracing
+cat << EOF > /var/vaultwarden-backup/rclone.conf
+[CloudflareR2]
+type = s3
+provider = Cloudflare
+access_key_id = $(get_secret r2_key_id)
+secret_access_key = $(get_secret r2_key)
+region = auto
+endpoint = https://${cf_account_id}.r2.cloudflarestorage.com
+acl = private
+EOF
+set -x # Re-enable tracing
 
 # Launch the Offsite Backup Engine
 docker run -d \
   --name vaultwarden_backup \
   --restart always \
   --network vaultwarden-net \
-  -v /var/vaultwarden/data:/data \
-  -e DATA_DIR=/data \
-  -e ZIP_TYPE=zip \
-  -e CRON_EXPRESSION="${backup_chron}" \
+  -v /var/vaultwarden/data:/data:ro \
+  -v /var/vaultwarden-backup/rclone.conf:/config/rclone.conf:ro \
+  -e RCLONE_REMOTE_NAME="CloudflareR2" \
+  -e CRON="${backup_chron}" \
+  -e ZIP_PASSWORD="$(get_secret "backup_pass")" \
   -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
-  -e BACKUP_ENCRYPTION_KEY="$(get_secret "backup_pass")" \
-  -e STORAGE_TYPE=s3 \
-  -e AWS_ACCESS_KEY_ID="$(get_secret r2_key_id || { sleep 10; get_secret r2_key_id; })" \
-  -e AWS_SECRET_ACCESS_KEY="$(get_secret r2_key || { sleep 10; get_secret r2_key; })" \
-  -e S3_ENDPOINT="https://${cf_account_id}.r2.cloudflarestorage.com" \
-  -e S3_BUCKET="${backup_bucket_name}" \
   ttionya/vaultwarden-backup:"${vaultwarden_backup_version}"

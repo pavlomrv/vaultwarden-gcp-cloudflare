@@ -9,7 +9,7 @@ variable "vw_backup_password" {
 }
 variable "vw_backup_cron" {
   type    = string
-  default = "0 20 * * *" # its in (ET), so here its ~3am
+  default = "0 0 * * *" # At 00:00 UTC
 }
 variable "vw_backup_keep_days" {
   type    = string
