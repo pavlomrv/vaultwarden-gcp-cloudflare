@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -Eeuo pipefail
 set +x 2>/dev/null # Disable command tracing, just in case
 mkdir -p /var/vaultwarden/data
 docker network inspect vaultwarden-net >/dev/null 2>&1 || \
