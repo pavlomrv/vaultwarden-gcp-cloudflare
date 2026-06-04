@@ -4,6 +4,7 @@ mkdir -p /var/vaultwarden/data
 docker network inspect vaultwarden-net >/dev/null 2>&1 || \
     docker network create vaultwarden-net # Create network if it doesnt exist
 
+# Get secret routines
 get_secret() {
   local name="$1"
   local token
@@ -20,6 +21,24 @@ get_secret() {
     | base64 -d
 }
 
+require_secret() {
+  local name="$1"
+  local value=""
+
+  for attempt in 1 2 3 4 5; do
+    if value="$(get_secret "$name")" && [[ -n "$value" ]]; then
+      printf '%s' "$value"
+      return 0
+    fi
+
+    echo "Secret '$name' unavailable, attempt $attempt/5" >&2
+    sleep 5
+  done
+
+  echo "Required secret '$name' could not be loaded; aborting startup" >&2
+  exit 1
+}
+
 # Launch Vaultwarden
 # Add  "-e DISABLE_ICON_DOWNLOAD=true \" in case you need to disable icons to save traffic
 docker run -d \
@@ -31,7 +50,7 @@ docker run -d \
   -e WEBSOCKET_ENABLED=true \
   -e ICON_SERVICE=internal \
   -e ICON_CACHE_TTL=2592000 \
-  -e ADMIN_TOKEN="$(get_secret admin_token_hash)" \
+  -e ADMIN_TOKEN="$(require_secret admin_token_hash)" \
   vaultwarden/server:"${vaultwarden_server_version}"
 
 sleep 10
@@ -41,7 +60,7 @@ docker run -d \
   --name cloudflared \
   --restart always \
   --network vaultwarden-net \
-  cloudflare/cloudflared:${cloudflared_version} tunnel --no-autoupdate run --token "$(get_secret vault_tunnel_token)"
+  cloudflare/cloudflared:${cloudflared_version} tunnel --no-autoupdate run --token "$(require_secret vault_tunnel_token)"
 
 # rclone config for backup container
 mkdir -p /var/vaultwarden-backup
@@ -51,8 +70,8 @@ cat << EOF > /var/vaultwarden-backup/rclone.conf
 [CloudflareR2]
 type = s3
 provider = Cloudflare
-access_key_id = $(get_secret r2_key_id)
-secret_access_key = $(get_secret r2_key)
+access_key_id = $(require_secret r2_key_id)
+secret_access_key = $(require_secret r2_key)
 region = auto
 endpoint = https://${cf_account_id}.r2.cloudflarestorage.com
 acl = private
@@ -69,6 +88,6 @@ docker run -d \
   -e RCLONE_REMOTE_NAME="CloudflareR2" \
   -e RCLONE_REMOTE_DIR="/${backup_bucket_name}/" \
   -e CRON="${backup_chron}" \
-  -e ZIP_PASSWORD="$(get_secret "backup_pass")" \
+  -e ZIP_PASSWORD="$(require_secret "backup_pass")" \
   -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
   ttionya/vaultwarden-backup:"${vaultwarden_backup_version}"
