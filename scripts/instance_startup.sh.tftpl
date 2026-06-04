@@ -1,4 +1,5 @@
 #!/bin/bash
+set +x 2>/dev/null # Disable command tracing, just in case
 mkdir -p /var/vaultwarden/data
 docker network inspect vaultwarden-net >/dev/null 2>&1 || \
     docker network create vaultwarden-net # Create network if it doesnt exist
@@ -46,7 +47,6 @@ docker run -d \
 mkdir -p /var/vaultwarden-backup
 touch /var/vaultwarden-backup/rclone.conf
 chmod 600 /var/vaultwarden-backup/rclone.conf
-set +x 2>/dev/null # Temporarily disable command tracing
 cat << EOF > /var/vaultwarden-backup/rclone.conf
 [CloudflareR2]
 type = s3
@@ -57,7 +57,6 @@ region = auto
 endpoint = https://${cf_account_id}.r2.cloudflarestorage.com
 acl = private
 EOF
-set -x # Re-enable tracing
 
 # Launch the Offsite Backup Engine
 docker run -d \
@@ -66,7 +65,9 @@ docker run -d \
   --network vaultwarden-net \
   -v /var/vaultwarden/data:/data:ro \
   -v /var/vaultwarden-backup/rclone.conf:/config/rclone.conf:ro \
+  -e DATA_DIR="/data" \
   -e RCLONE_REMOTE_NAME="CloudflareR2" \
+  -e RCLONE_REMOTE_DIR="/${backup_bucket_name}/" \
   -e CRON="${backup_chron}" \
   -e ZIP_PASSWORD="$(get_secret "backup_pass")" \
   -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
