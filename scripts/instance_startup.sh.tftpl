@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 set +x 2>/dev/null # Disable command tracing, just in case
-mkdir -p /var/vaultwarden/data
+
 docker network inspect vaultwarden-net >/dev/null 2>&1 || \
     docker network create vaultwarden-net # Create network if it doesnt exist
 
@@ -42,6 +42,9 @@ require_secret() {
 }
 
 # Launch Vaultwarden
+mkdir -p /var/vaultwarden/data
+docker stop vaultwarden 2>/dev/null || true
+docker rm -f vaultwarden 2>/dev/null || true
 # Add  "-e DISABLE_ICON_DOWNLOAD=true \" in case you need to disable icons to save traffic
 docker run -d \
   --name vaultwarden \
@@ -58,6 +61,8 @@ docker run -d \
 sleep 10
 
 # Launch Cloudflare Tunnel (Connects out to CF, routes to vaultwarden container)
+docker stop cloudflared 2>/dev/null || true
+docker rm -f cloudflared 2>/dev/null || true
 docker run -d \
   --name cloudflared \
   --restart always \
@@ -80,6 +85,8 @@ acl = private
 EOF
 
 # Launch the Offsite Backup Engine
+docker stop vaultwarden_backup 2>/dev/null || true
+docker rm -f vaultwarden_backup 2>/dev/null || true
 docker run -d \
   --name vaultwarden_backup \
   --restart always \
