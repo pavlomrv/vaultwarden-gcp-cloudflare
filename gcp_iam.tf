@@ -21,6 +21,13 @@ resource "google_secret_manager_secret_iam_member" "vm_secret_access" {
   member    = "serviceAccount:${google_service_account.vaultwarden_vm_sa.email}"
 }
 
+# -------- Access to the bucket tha holds the backup restore script  --------
+resource "google_storage_bucket_iam_member" "vm_storage_viewer" {
+  bucket = google_storage_bucket.restore_script_bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.vaultwarden_vm_sa.email}"
+}
+
 # -------- Secrets --------
 resource "google_secret_manager_secret" "r2_key_id" {
   secret_id = "r2_key_id"

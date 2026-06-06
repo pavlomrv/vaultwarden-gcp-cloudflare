@@ -1,24 +1,20 @@
 #!/usr/bin/env bash
 
-
-#Usage:
-
-#cd bootstrap
-#PROJECT_ID=my-project ./recover-state.sh user:me@example.com
-
-#Or with multiple impersonators:
-
-#PROJECT_ID=my-project ./recover-state.sh \
-#  user:me@example.com \
-#  serviceAccount:ci@my-project.iam.gserviceaccount.com
-
-#Important details:
-#- Pass the same impersonators you used for `terraform_state_impersonators`.
-#- The script recreates Terraform’s local state by importing existing GCP resources; it does not restore old state history.
-#- After it runs, `terraform plan` should be empty or very small. If it wants to recreate the bucket or service account, stop and inspect before applying.
-
-#TODO review this
-
+#  Usage:
+#  cd bootstrap
+#  PROJECT_ID=my-project ./recover-state.sh user:me@example.com
+#
+#  Or with multiple impersonators:
+#
+#  PROJECT_ID=my-project ./recover-state.sh \
+#    user:me@example.com \
+#    serviceAccount:ci@my-project.iam.gserviceaccount.com
+#
+#  Important details:
+#  - Pass the same impersonators you used for `terraform_state_impersonators`.
+#  - The script recreates Terraform’s local state by importing existing GCP resources; it does not restore old state history.
+#  - After it runs, `terraform plan` should be empty or very small. If it wants to recreate the bucket or service account, stop and inspect before applying.
+# TODO help readme printout? review?
 set -euo pipefail
 
 PROJECT_ID="${PROJECT_ID:?Set PROJECT_ID, e.g. PROJECT_ID=my-gcp-project}"

@@ -6,10 +6,6 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 7"
     }
-    # cloudflare = {
-    #   source  = "cloudflare/cloudflare"
-    #   version = "~> 5"
-    # }
   }
 }
 
@@ -33,6 +29,7 @@ variable "tfstate_bucket" {
 resource "google_storage_bucket" "tfstate" {
   name                        = var.tfstate_bucket
   location                    = var.region
+  storage_class               = "STANDARD"
   force_destroy               = false
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"

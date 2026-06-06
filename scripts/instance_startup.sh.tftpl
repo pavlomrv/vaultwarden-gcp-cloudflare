@@ -7,22 +7,21 @@ docker network inspect vaultwarden-net >/dev/null 2>&1 || \
     docker network create vaultwarden-net # Create network if it doesnt exist
 
 # Get secret routines
+get_token() {
+  curl -sf -H "Metadata-Flavor: Google" \
+    "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
+    | jq -r '.access_token'
+}
 get_secret() {
   local name="$1"
   local token
-
-  token="$(curl -sf -H "Metadata-Flavor: Google" \
-    "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
-    | jq -r '.access_token')"
-
+  token=$(get_token)
   [[ -z "$token" || "$token" == "null" ]] && return 1
-
   curl -sf -H "Authorization: Bearer $${token}" \
     "https://secretmanager.googleapis.com/v1/projects/${gcp_project_id}/secrets/$${name}/versions/latest:access" \
     | jq -r '.payload.data' \
     | base64 -d
 }
-
 require_secret() {
   local name="$1"
   local value=""
@@ -100,3 +99,11 @@ docker run -d \
   -e ZIP_PASSWORD="$(require_secret "backup_pass")" \
   -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
   ttionya/vaultwarden-backup:"${vaultwarden_backup_version}"
+
+# Download the restore_backup.sh script
+curl -s -H "Authorization: Bearer $(get_token)" \
+  "https://storage.googleapis.com/storage/v1/b/${restore_script_bucket_name}/o/${restore_script_object_name}?alt=media" \
+  -o /var/${restore_script_object_name}
+
+sed -i 's/VAULTWARDEN_BACKUP_VERSION=""/VAULTWARDEN_BACKUP_VERSION="${vaultwarden_backup_version}"/g' /var/${restore_script_object_name}
+chmod +x /var/${restore_script_object_name}

@@ -64,5 +64,22 @@ resource "google_compute_instance" "vault_vm" {
     backup_chron               = var.vw_backup_cron
     backup_keep_days           = var.vw_backup_keep_days
     gcp_project_id             = var.gcp_project_id
+    restore_script_bucket_name = google_storage_bucket.restore_script_bucket.name
+    restore_script_object_name = google_storage_bucket_object.restore_backup_script.name
   })
+}
+
+# Bucket that holds the 'restore backup' script
+resource "google_storage_bucket" "restore_script_bucket" {
+  name                        = "vaultwarden-restore-backup-bucket"
+  location                    = var.gcp_region
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+}
+# and we upload the script to the bucket
+resource "google_storage_bucket_object" "restore_backup_script" {
+  name   = "restore_backup.sh"
+  source = "${path.module}/scripts/restore_backup.sh"
+  bucket = google_storage_bucket.restore_script_bucket.name
 }
