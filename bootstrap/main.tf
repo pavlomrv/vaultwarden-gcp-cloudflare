@@ -20,13 +20,13 @@ variable "region" {
   type    = string
   default = "us-east1"
 }
-variable "tfstate_bucket" {
+variable "tfstate_bucket_name" {
   type = string
 }
 
 # -------- tfstate bucket
 resource "google_storage_bucket" "tfstate" {
-  name                        = var.tfstate_bucket
+  name                        = var.tfstate_bucket_name
   location                    = var.region
   storage_class               = "STANDARD"
   force_destroy               = false
