@@ -46,12 +46,12 @@ resource "google_compute_instance" "vault_vm" {
   depends_on = [
     google_secret_manager_secret_iam_member.vm_secret_access,
     cloudflare_zero_trust_tunnel_cloudflared.vault_tunnel,
-
     google_secret_manager_secret_version.r2_key_val,
     google_secret_manager_secret_version.r2_key_id_val,
     google_secret_manager_secret_version.backup_pass_val,
     google_secret_manager_secret_version.admin_token_hash_val,
     google_secret_manager_secret_version.vault_tunnel_token_val,
+    google_storage_bucket_iam_member.vm_restore_script_viewer,
   ]
 
   # Docker startup execution
@@ -71,7 +71,7 @@ resource "google_compute_instance" "vault_vm" {
 
 # Bucket that holds the 'restore backup' script
 resource "google_storage_bucket" "restore_script_bucket" {
-  name                        = "vaultwarden-restore-backup-bucket"
+  name                        = var.gcp_restore_script_bucket_name
   location                    = var.gcp_region
   storage_class               = "STANDARD"
   uniform_bucket_level_access = true

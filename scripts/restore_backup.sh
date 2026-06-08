@@ -41,16 +41,13 @@ if [[ "$CONFIRM" != "restore" ]]; then
   echo "Error: Refusing to restore without CONFIRM=restore"
   show_usage
   exit 1
-elif [[ -z "$R2_BUCKET" ]]; then
+elif [[ -z "${R2_BUCKET:-}" ]]; then
   echo "Error: R2_BUCKET variable is not set. Nothing to restore."
   show_usage
   exit 1
 fi
 
 mkdir -p /var/vaultwarden/restore
-
-echo "Stopping containers..."
-docker stop vaultwarden_backup cloudflared vaultwarden 2>/dev/null || true
 
 echo "Downloading backup from R2..."
 docker run --rm \
@@ -61,6 +58,9 @@ docker run --rm \
   copy \
   "CloudflareR2:/$R2_BUCKET/$BACKUP_FILE" \
   /restore
+
+echo "Stopping containers..."
+docker stop vaultwarden_backup cloudflared vaultwarden 2>/dev/null || true
 
 echo "Taking local pre-restore snapshot..."
 timestamp=$(date +%Y%m%d-%H%M%S)

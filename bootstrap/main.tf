@@ -21,8 +21,7 @@ variable "region" {
   default = "us-east1"
 }
 variable "tfstate_bucket" {
-  type    = string
-  default = "vaultwarden-tfstate"
+  type = string
 }
 
 # -------- tfstate bucket

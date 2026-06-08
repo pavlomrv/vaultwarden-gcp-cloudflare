@@ -33,6 +33,7 @@ variable "gcp_service_account" {
   type      = string
   sensitive = true
 }
+variable "gcp_restore_script_bucket_name" { type = string }
 
 # Cloudflare
 variable "cf_domain" { # 'domain.com'

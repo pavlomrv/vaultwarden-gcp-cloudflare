@@ -101,9 +101,11 @@ docker run -d \
   ttionya/vaultwarden-backup:"${vaultwarden_backup_version}"
 
 # Download the restore_backup.sh script
-curl -s -H "Authorization: Bearer $(get_token)" \
+restore_script_path="/var/${restore_script_object_name}"
+curl -fsS --retry 5 -H "Authorization: Bearer $(get_token)" \
   "https://storage.googleapis.com/storage/v1/b/${restore_script_bucket_name}/o/${restore_script_object_name}?alt=media" \
-  -o /var/${restore_script_object_name}
+  -o "$restore_script_path"
 
-sed -i 's/VAULTWARDEN_BACKUP_VERSION=""/VAULTWARDEN_BACKUP_VERSION="${vaultwarden_backup_version}"/g' /var/${restore_script_object_name}
-chmod +x /var/${restore_script_object_name}
+sed -i "s/VAULTWARDEN_BACKUP_VERSION=\"\"/VAULTWARDEN_BACKUP_VERSION=\"${vaultwarden_backup_version}\"/g" "$restore_script_path"
+bash -n "$restore_script_path"
+chmod +x "$restore_script_path"
