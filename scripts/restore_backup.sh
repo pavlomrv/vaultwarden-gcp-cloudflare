@@ -11,22 +11,40 @@ show_usage() {
 
 Vaultwarden Data Restore Script
 
-The script will:
-1. Stop running Vaultwarden and Cloudflared containers.
-2. Create a local safety backup (.tgz) of the current state.
-3. Download the specified backup ZIP from R2 and restore it.
-   You will be prompted for the zip password.
-4. Restart all containers.
+Restores Vaultwarden data from an encrypted backup stored in
+Cloudflare R2. The script performs the following steps:
 
-Usage:
-  R2_BUCKET=<bucket> CONFIRM=restore ./${script_name} <backup-file.zip>
+  1. Downloads the specified backup ZIP from R2.
+  2. Stops Vaultwarden, Cloudflared, and backup containers.
+  3. Creates a local safety snapshot (.tgz) of the current data.
+  4. Extracts and restores the backup (you will be prompted for
+     the zip password).
+  5. Restarts all containers.
 
-Required Arguments:
-  <backup-file.zip>   The exact name of the .zip backup file stored in R2.
+USAGE:
+  CONFIRM=restore R2_BUCKET=<bucket> ./${script_name} [-h|--help] <backup-file.zip>
 
-Required Environment Variables:
-  R2_BUCKET           The Cloudflare R2 bucket name where backups live.
-  CONFIRM=restore     A safety flag required to execute this destructive restore.
+ARGUMENTS:
+  <backup-file.zip>     The exact filename of the .zip backup in R2.
+  -h, --help            Show this help message and exit.
+
+REQUIRED ENVIRONMENT VARIABLES:
+  R2_BUCKET             Cloudflare R2 bucket name where backups are stored.
+  CONFIRM=restore       Safety flag — the script refuses to run without it.
+
+PREREQUISITES:
+  - Docker must be running.
+  - A valid rclone config must exist at /var/vaultwarden-backup/rclone.conf
+    with a remote named 'CloudflareR2'.
+
+EXAMPLE:
+  CONFIRM=restore R2_BUCKET=my-vw-backups \\
+    ./${script_name} backup-20260601-000000.zip
+
+IMPORTANT WARNING:
+  This is a DESTRUCTIVE operation — it replaces the contents of
+  /var/vaultwarden/data. A pre-restore snapshot is saved automatically
+  at /var/vaultwarden/pre-restore-<timestamp>.tgz.
 ---------------------------------------------------------------------
 EOF
 }

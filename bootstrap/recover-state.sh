@@ -11,22 +11,40 @@ show_usage() {
 
 Bootstrap TF State Restore Script
 
-The script will recreate Terraform’s local state by importing existing
-GCP resources. It does not restore old state history.
+Recreates Terraform's local state by importing existing GCP resources.
+This is useful when the remote state file is lost or corrupted and you
+need to re-sync Terraform with infrastructure that already exists.
+It does NOT restore old state history — it creates a fresh local state.
 
 USAGE:
-  ./${script_name} [-h|--help] <IMPERSONATOR_1> [IMPERSONATOR_2 ...]
+  ./${script_name} [-h|--help] [IMPERSONATOR ...]
 
-Or with multiple impersonators:
+  Run from the bootstrap/ directory. Each IMPERSONATOR should match an
+  entry in your 'terraform_state_impersonators' variable, formatted as:
+    user:<email>  or  serviceAccount:<email>
+
+CONFIGURATION:
+  The script resolves settings from three sources (highest priority first):
+    1. Environment variables
+    2. Values parsed from terraform.tfvars (in the current directory)
+    3. Interactive prompt (fallback)
+
+  Environment Variables (all optional):
+    PROJECT_ID        GCP project ID.
+    TFSTATE_BUCKET    Name of the GCS bucket holding Terraform state.
+
+EXAMPLE:
   cd bootstrap
-  PROJECT_ID=my-project ./recover-state.sh \
-    user:me@example.com \
-    serviceAccount:ci@my-project.iam.gserviceaccount.com
+  PROJECT_ID=my-project TFSTATE_BUCKET=my-tfstate-bucket \\
+    ./${script_name} \\
+      user:me@example.com \\
+      serviceAccount:ci@my-project.iam.gserviceaccount.com
 
-Important details:
-- Pass the same impersonators you used for `terraform_state_impersonators` variable.
-- After it runs, 'terraform plan' should be empty or very small. If it
-  wants to destroy/recreate critical resources, stop and inspect!
+IMPORTANT:
+  - After the import, 'terraform plan' runs automatically. The diff
+    should be empty or trivially small. If Terraform wants to destroy
+    or recreate critical resources, stop and inspect before applying!
+  - This script uses '-backend=false' so no remote state is touched.
 ---------------------------------------------------------------------
 EOF
 }
@@ -69,21 +87,17 @@ DEFAULT_BUCKET="${TFSTATE_BUCKET:-$TFVARS_BUCKET}"
 read -r -p "Terraform State Bucket Name [${DEFAULT_BUCKET}]: " INPUT_BUCKET
 TFSTATE_BUCKET="${INPUT_BUCKET:-$DEFAULT_BUCKET}"
 
-# 3. Resolve Service Account Name (Env -> tfvars -> Prompt)
-TFVARS_SA=$(parse_tfvar "terraform_state_sa_id")
-[[ -z "$TFVARS_SA" ]] && TFVARS_SA=$(parse_tfvar "state_sa_id") # fallback naming check
-DEFAULT_SA="${STATE_SA_ID:-$TFVARS_SA}"
-read -r -p "State Service Account Name [${DEFAULT_SA}]: " INPUT_SA
-STATE_SA_ID="${INPUT_SA:-$DEFAULT_SA}"
-
 # Derived variables
-STATE_SA_EMAIL="${STATE_SA_ID}@${PROJECT_ID}.iam.gserviceaccount.com"
+
+# SA account_id is hardcoded in bootstrap/main.tf -> google_service_account.terraform_state
+STATE_SA_EMAIL="terraform-state@${PROJECT_ID}.iam.gserviceaccount.com"
+
 IMPERSONATORS=("$@")
 
 # Build HCL array for Terraform execution
 members_hcl="["
 sep=""
-for member in "${IMPERSONATORS[@]}"; do
+for member in ${IMPERSONATORS[@]+"${IMPERSONATORS[@]}"}; do
   members_hcl="${members_hcl}${sep}\"${member}\""
   sep=","
 done
@@ -91,7 +105,7 @@ members_hcl="${members_hcl}]"
 
 # tsfvars
 export TF_VAR_gcp_project_id="$PROJECT_ID"
-export TF_VAR_tfstate_bucket="$TFSTATE_BUCKET"
+export TF_VAR_tfstate_bucket_name="$TFSTATE_BUCKET"
 export TF_VAR_terraform_state_impersonators="$members_hcl"
 
 echo -e "\n-----------------------------------------------------"
