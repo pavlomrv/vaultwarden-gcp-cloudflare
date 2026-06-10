@@ -3,9 +3,13 @@
 set -Eeuo pipefail
 
 show_usage() {
-  cat << EOF
+  local script_name
+  script_name=$(basename "$0")
 
-Vaultwarden Restore Utility
+  cat << EOF
+---------------------------------------------------------------------
+
+Vaultwarden Data Restore Script
 
 The script will:
 1. Stop running Vaultwarden and Cloudflared containers.
@@ -13,9 +17,9 @@ The script will:
 3. Download the specified backup ZIP from R2 and restore it.
    You will be prompted for the zip password.
 4. Restart all containers.
----------------------------------------------------------------------
+
 Usage:
-  R2_BUCKET=<bucket> CONFIRM=restore $0 <backup-file.zip>
+  R2_BUCKET=<bucket> CONFIRM=restore ./${script_name} <backup-file.zip>
 
 Required Arguments:
   <backup-file.zip>   The exact name of the .zip backup file stored in R2.
@@ -24,7 +28,6 @@ Required Environment Variables:
   R2_BUCKET           The Cloudflare R2 bucket name where backups live.
   CONFIRM=restore     A safety flag required to execute this destructive restore.
 ---------------------------------------------------------------------
-
 EOF
 }
 
