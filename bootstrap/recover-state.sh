@@ -153,6 +153,7 @@ done
 import_if_missing google_project_service.compute_api "${PROJECT_ID}/compute.googleapis.com"
 import_if_missing google_project_service.secret_manager_api "${PROJECT_ID}/secretmanager.googleapis.com"
 import_if_missing google_project_service.iam_credentials "${PROJECT_ID}/iamcredentials.googleapis.com"
+import_if_missing google_project_service.iam_api "${PROJECT_ID}/iam.googleapis.com"
 
 echo "---------------------------------------------------------------------"
 echo "Import phase complete. Running plan to verify state alignment..."
