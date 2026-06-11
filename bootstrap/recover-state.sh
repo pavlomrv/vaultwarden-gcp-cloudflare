@@ -7,7 +7,7 @@ show_usage() {
   script_name=$(basename "$0")
 
   cat << EOF
----------------------------------------------------------------------
+----------------------------------------------------------------------
 
 Bootstrap TF State Restore Script
 
@@ -45,7 +45,7 @@ IMPORTANT:
     should be empty or trivially small. If Terraform wants to destroy
     or recreate critical resources, stop and inspect before applying!
   - This script uses '-backend=false' so no remote state is touched.
----------------------------------------------------------------------
+----------------------------------------------------------------------
 EOF
 }
 

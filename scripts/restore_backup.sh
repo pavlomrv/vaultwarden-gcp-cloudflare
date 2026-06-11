@@ -7,7 +7,7 @@ show_usage() {
   script_name=$(basename "$0")
 
   cat << EOF
----------------------------------------------------------------------
+----------------------------------------------------------------------
 
 Vaultwarden Data Restore Script
 
@@ -45,7 +45,7 @@ IMPORTANT WARNING:
   This is a DESTRUCTIVE operation — it replaces the contents of
   /var/vaultwarden/data. A pre-restore snapshot is saved automatically
   at /var/vaultwarden/pre-restore-<timestamp>.tgz.
----------------------------------------------------------------------
+----------------------------------------------------------------------
 EOF
 }
 
