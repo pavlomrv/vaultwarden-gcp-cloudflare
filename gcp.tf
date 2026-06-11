@@ -33,9 +33,9 @@ resource "google_compute_instance" "vault_vm" {
   network_interface {
     network = "default"
 
-    # trivy:ignore:AVD-GCP-0031
     # Justification: Utilizing ephemeral IP for outbound Cloudflare Tunnel connectivity
     # to avoid Cloud NAT costs. All inbound ingress is blocked via GCP firewall.
+    # trivy:ignore:AVD-GCP-0031
     access_config {
       # Ephemeral public IP
     }
