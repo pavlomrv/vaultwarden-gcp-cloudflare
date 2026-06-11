@@ -17,7 +17,7 @@ resource "random_id" "tunnel_secret" {
 # Create the Cloudflare Tunnel
 resource "cloudflare_zero_trust_tunnel_cloudflared" "vault_tunnel" {
   account_id    = var.cf_account_id
-  name          = "warden-gcp-tunnel"
+  name          = var.cf_tunnel_name
   tunnel_secret = random_id.tunnel_secret.b64_std
   config_src    = "cloudflare"
 }
@@ -51,8 +51,8 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vault_tunnel_config"
 # Create the Cloudflare R2 Bucket for backups
 resource "cloudflare_r2_bucket" "vault_backup_bucket" {
   account_id = var.cf_account_id
-  name       = "vaultwarden-backups-pspm" # Must be unique within your account
-  location   = "enam"                     # Eastern North America
+  name       = var.cf_r2_backup_bucket_name
+  location   = var.cf_r2_location
 }
 
 # Enforce SSL Mode to "Full"

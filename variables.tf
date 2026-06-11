@@ -62,6 +62,19 @@ variable "cf_r2_key" {
   type      = string
   sensitive = true
 }
+variable "cf_r2_backup_bucket_name" {
+  type        = string
+  description = "Cloudflare R2 bucket name used for Vaultwarden backups."
+}
+variable "cf_r2_location" {
+  type        = string
+  description = "Cloudflare R2 bucket location hint. Note that free tier is limited to several locations"
+  default     = "enam" # Eastern North America
+}
+variable "cf_tunnel_name" {
+  type    = string
+  default = "vaultwarden-gcp-tunnel"
+}
 
 # Docker
 variable "vaultwarden_server_version" {
