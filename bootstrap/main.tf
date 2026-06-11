@@ -83,6 +83,11 @@ resource "google_project_service" "iam_credentials" {
   disable_on_destroy         = false
   disable_dependent_services = false
 }
+resource "google_project_service" "iam_api" {
+  project            = var.gcp_project_id
+  service            = "iam.googleapis.com"
+  disable_on_destroy = false
+}
 
 # -------- Outputs
 output "backend_bucket_name" {
