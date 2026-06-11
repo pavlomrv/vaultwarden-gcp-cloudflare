@@ -1,0 +1,67 @@
+name: Infrastructure CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  shell-linter:
+    name: ShellCheck Validator
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          # This automatically scans the root, ./bootstrap, and ./scripts directories
+          scandir: '.'
+
+  terraform-linter:
+    name: Terraform Syntax & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true # Will flag format issues but won't hard-fail the run
+
+      - name: Terraform Init (Local Only)
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Init TFLint
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Run TFLint
+        run: tflint -f compact --recursive
+
+  security-scanner:
+      name: Trivy Security Scanner
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+
+        - name: Run Trivy Config Scan
+          uses: aquasecurity/trivy-action@0.28.0 # Use the latest stable version
+          with:
+            scan-type: 'config'
+            severity: 'HIGH,CRITICAL'
+            exit-code: '1' # Gracefully blocks the PR if severe flaws are found
