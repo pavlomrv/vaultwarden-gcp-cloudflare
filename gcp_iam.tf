@@ -14,6 +14,13 @@ resource "google_service_account" "vaultwarden_vm_sa" {
   account_id   = "vaultwarden-vm-sa"
   display_name = "Vaultwarden VM Identity"
 }
+
+# -------- Project Level Permissions --------
+resource "google_project_iam_member" "vm_logging" {
+  project = var.gcp_project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.vaultwarden_vm_sa.email}"
+}
 resource "google_secret_manager_secret_iam_member" "vm_secret_access" {
   for_each  = local.gcp_secrets
   secret_id = each.value
