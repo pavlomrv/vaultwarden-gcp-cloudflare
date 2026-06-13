@@ -91,7 +91,7 @@ docker run -d \
   --restart always \
   --network vaultwarden-net \
   -v /var/vaultwarden/data:/data:ro \
-  -v /var/vaultwarden-backup/rclone.conf:/config/rclone.conf:ro \
+  -v /var/vaultwarden-backup/rclone.conf:/config/rclone/rclone.conf:ro \
   -e DATA_DIR="/data" \
   -e RCLONE_REMOTE_NAME="CloudflareR2" \
   -e RCLONE_REMOTE_DIR="/${backup_bucket_name}/" \
