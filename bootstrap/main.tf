@@ -88,7 +88,11 @@ resource "google_project_service" "iam_api" {
   service            = "iam.googleapis.com"
   disable_on_destroy = false
 }
-
+resource "google_project_service" "crm_api" {
+  project            = var.gcp_project_id
+  service            = "cloudresourcemanager.googleapis.com"
+  disable_on_destroy = false
+}
 # -------- Outputs
 output "backend_bucket_name" {
   description = "The exact name of the GCS bucket to use in your backend config."
