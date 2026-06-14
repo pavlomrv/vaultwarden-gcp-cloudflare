@@ -59,7 +59,7 @@ resource "cloudflare_r2_bucket" "vault_backup_bucket" {
 resource "cloudflare_zone_setting" "ssl_settings" {
   zone_id    = var.cf_zone_id
   setting_id = "ssl"
-  value      = "full"
+  value      = "strict"
 }
 
 # Enforce "Always Use HTTPS" (Automatic 301 redirects)
