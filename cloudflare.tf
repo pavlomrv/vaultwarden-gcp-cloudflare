@@ -90,10 +90,10 @@ resource "cloudflare_ruleset" "waf_login_rate_limit" {
     # Matches the primary Vaultwarden authentication paths
     expression = "(http.request.method eq \"POST\" and (http.request.uri.path eq \"/identity/connect/token\" or http.request.uri.path eq \"/api/accounts/prelogin\"))"
     ratelimit = {
-      characteristics     = ["ip.src"] # Tracks requests by source IP
-      period              = 60         # Rolling 60-second window
-      requests_per_period = 5          # Allow 5 requests per window
-      mitigation_timeout  = 300        # Block for 5 minutes if exceeded
+      characteristics     = ["cf.colo.id", "ip.src"] # Tracks requests by source IP
+      period              = 10                       # Rolling 10 seconds window (Free tier limit)
+      requests_per_period = 3                        # Allow 5 requests per window
+      mitigation_timeout  = 10                       # Block for 10 seconds if exceeded (Free tier limit)
     }
   }]
 }
