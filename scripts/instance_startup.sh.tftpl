@@ -96,7 +96,7 @@ docker run -d \
   -e DATA_DIR="/data" \
   -e RCLONE_REMOTE_NAME="CloudflareR2" \
   -e RCLONE_REMOTE_DIR="/${backup_bucket_name}/" \
-  -e CRON="${backup_chron}" \
+  -e CRON="${backup_cron}" \
   -e ZIP_PASSWORD="$(require_secret "backup_pass")" \
   -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
   ttionya/vaultwarden-backup:"${vaultwarden_backup_version}"

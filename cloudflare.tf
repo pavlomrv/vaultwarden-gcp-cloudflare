@@ -75,3 +75,25 @@ resource "cloudflare_zone_setting" "min_tls_setting" {
   setting_id = "min_tls_version"
   value      = "1.2"
 }
+
+resource "cloudflare_ruleset" "waf_login_rate_limit" {
+  zone_id     = var.cf_zone_id
+  name        = "Login Rate Limiting"
+  description = "Block brute force login attempts at the edge"
+  kind        = "zone"
+  phase       = "http_ratelimit"
+
+  rules = [{
+    action      = "block"
+    description = "Limit logins to 5 per minute"
+    enabled     = true
+    # Matches the primary Vaultwarden authentication paths
+    expression = "(http.request.method eq \"POST\" and (http.request.uri.path eq \"/identity/connect/token\" or http.request.uri.path eq \"/api/accounts/prelogin\"))"
+    ratelimit = {
+      characteristics     = ["ip.src"] # Tracks requests by source IP
+      period              = 60         # Rolling 60-second window
+      requests_per_period = 5          # Allow 5 requests per window
+      mitigation_timeout  = 300        # Block for 5 minutes if exceeded
+    }
+  }]
+}
