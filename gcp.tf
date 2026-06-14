@@ -4,10 +4,24 @@ data "cloudflare_zero_trust_tunnel_cloudflared_token" "vault_tunnel" {
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.vault_tunnel.id
 }
 
+# Allow SSH via IAP
+resource "google_compute_firewall" "allow_ssh_iap" {
+  name     = "vaultwarden-allow-ssh-iap"
+  network  = "default"
+  priority = 1000
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  source_ranges = ["35.235.240.0/20"]
+  target_tags   = ["vaultwarden-server"]
+}
+
 # Firewall deny all
 resource "google_compute_firewall" "deny_all_ingress" {
-  name    = "vaultwarden-deny-ingress"
-  network = "default"
+  name     = "vaultwarden-deny-ingress"
+  network  = "default"
+  priority = 65534
   deny {
     protocol = "all"
   }
