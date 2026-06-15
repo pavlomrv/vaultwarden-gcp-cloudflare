@@ -73,7 +73,7 @@ mkdir -p /var/vaultwarden/restore
 echo "Downloading backup from R2..."
 docker run --rm \
   --entrypoint rclone \
-  -v /var/vaultwarden-backup/rclone.conf:/config/rclone.conf:ro \
+  -v /var/vaultwarden-backup/rclone.conf:/config/rclone/rclone.conf:ro \
   -v /var/vaultwarden/restore:/restore \
   ttionya/vaultwarden-backup:"${VAULTWARDEN_BACKUP_VERSION:-1.26.10}" \
   copy \
