@@ -53,6 +53,7 @@ resource "cloudflare_r2_bucket" "vault_backup_bucket" {
   account_id = var.cf_account_id
   name       = var.cf_r2_backup_bucket_name
   location   = var.cf_r2_location
+  lifecycle { prevent_destroy = true } # Its backup, would be cringe to lose it like this
 }
 
 # Enforce SSL Mode to "Full"
@@ -92,7 +93,7 @@ resource "cloudflare_ruleset" "waf_login_rate_limit" {
     ratelimit = {
       characteristics     = ["cf.colo.id", "ip.src"] # Tracks requests by source IP
       period              = 10                       # Rolling 10 seconds window (Free tier limit)
-      requests_per_period = 3                        # Allow 5 requests per window
+      requests_per_period = 3                        # Allow 3 requests per window
       mitigation_timeout  = 10                       # Block for 10 seconds if exceeded (Free tier limit)
     }
   }]
