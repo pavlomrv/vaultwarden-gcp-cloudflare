@@ -70,6 +70,7 @@ docker run -d \
 
 # rclone config for backup container
 mkdir -p /var/vaultwarden-backup
+mount -t tmpfs -o size=1M tmpfs /var/vaultwarden-backup
 touch /var/vaultwarden-backup/rclone.conf
 chmod 600 /var/vaultwarden-backup/rclone.conf
 cat << EOF > /var/vaultwarden-backup/rclone.conf
