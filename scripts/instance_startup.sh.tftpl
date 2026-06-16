@@ -112,7 +112,7 @@ docker run -d \
   -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
   ttionya/vaultwarden-backup:"${vaultwarden_backup_version}"
 
-# Download the restore_backup.sh script
+echo "Downloading the restore_backup.sh script"
 restore_script_path="/var/${restore_script_object_name}"
 curl -fsS --retry 5 -H "Authorization: Bearer $(get_token)" \
   "https://storage.googleapis.com/storage/v1/b/${restore_script_bucket_name}/o/${restore_script_object_name}?alt=media" \
@@ -121,3 +121,5 @@ curl -fsS --retry 5 -H "Authorization: Bearer $(get_token)" \
 sed -i "s/VAULTWARDEN_BACKUP_VERSION=\"\"/VAULTWARDEN_BACKUP_VERSION=\"${vaultwarden_backup_version}\"/g" "$restore_script_path"
 bash -n "$restore_script_path"
 chmod +x "$restore_script_path" # '/var' mount is noexec, so this is kinda useless?
+
+echo "All done, have a good flight"
