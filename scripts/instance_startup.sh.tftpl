@@ -57,7 +57,17 @@ docker run -d \
   -e ADMIN_TOKEN="$(require_secret admin_token_hash)" \
   vaultwarden/server:"${vaultwarden_server_version}"
 
-sleep 10
+VW_IP=""
+echo "Fetching vaultwarden IP..."
+while [ -z "$VW_IP" ]; do
+  VW_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' vaultwarden 2>/dev/null || true)
+  sleep 1
+done
+
+echo "Waiting for Vaultwarden to initialize..."
+until curl -f -s -o /dev/null "http://${VW_IP}/alive"; do
+  sleep 2
+done
 
 # Launch Cloudflare Tunnel (Connects out to CF, routes to vaultwarden container)
 docker stop cloudflared 2>/dev/null || true
@@ -110,4 +120,4 @@ curl -fsS --retry 5 -H "Authorization: Bearer $(get_token)" \
 
 sed -i "s/VAULTWARDEN_BACKUP_VERSION=\"\"/VAULTWARDEN_BACKUP_VERSION=\"${vaultwarden_backup_version}\"/g" "$restore_script_path"
 bash -n "$restore_script_path"
-chmod +x "$restore_script_path"
+chmod +x "$restore_script_path" # '/var' mount is noexec, so this is kinda useless?

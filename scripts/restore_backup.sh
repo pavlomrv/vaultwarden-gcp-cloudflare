@@ -22,7 +22,7 @@ Cloudflare R2. The script performs the following steps:
   5. Restarts all containers.
 
 USAGE:
-  CONFIRM=restore R2_BUCKET=<bucket> ./${script_name} [-h|--help] <backup-file.zip>
+  CONFIRM=restore R2_BUCKET=<bucket> bash ./${script_name} [-h|--help] <backup-file.zip>
 
 ARGUMENTS:
   <backup-file.zip>     The exact filename of the .zip backup in R2.
@@ -39,7 +39,7 @@ PREREQUISITES:
 
 EXAMPLE:
   CONFIRM=restore R2_BUCKET=my-vw-backups \\
-    ./${script_name} backup-20260601-000000.zip
+    bash ./${script_name} backup-20260601-000000.zip
 
 IMPORTANT WARNING:
   This is a DESTRUCTIVE operation — it replaces the contents of
