@@ -65,7 +65,7 @@ while [ -z "$VW_IP" ]; do
 done
 
 echo "Waiting for Vaultwarden to initialize..."
-until curl -f -s -o /dev/null "http://${VW_IP}/alive"; do
+until curl -f -s -o /dev/null "http://$${VW_IP}/alive"; do
   sleep 2
 done
 
