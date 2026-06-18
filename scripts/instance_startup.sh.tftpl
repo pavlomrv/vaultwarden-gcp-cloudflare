@@ -55,7 +55,7 @@ docker run -d \
   -e ICON_SERVICE=internal \
   -e ICON_CACHE_TTL=2592000 \
   -e ADMIN_TOKEN="$(require_secret admin_token_hash)" \
-  vaultwarden/server:"${vaultwarden_server_version}"
+  vaultwarden/server@"${vaultwarden_server_container_hash}"
 
 # Launch Cloudflare Tunnel (Connects out to CF, routes to vaultwarden container)
 docker stop cloudflared 2>/dev/null || true
@@ -64,7 +64,7 @@ docker run -d \
   --name cloudflared \
   --restart always \
   --network vaultwarden-net \
-  cloudflare/cloudflared:${cloudflared_version} tunnel --no-autoupdate run --token "$(require_secret vault_tunnel_token)"
+  cloudflare/cloudflared@${cloudflare_cloudflared_container_hash} tunnel --no-autoupdate run --token "$(require_secret vault_tunnel_token)"
 
 # rclone config for backup container
 mkdir -p /var/vaultwarden-backup
@@ -98,7 +98,7 @@ docker run -d \
   -e CRON="${backup_cron}" \
   -e ZIP_PASSWORD="$(require_secret "backup_pass")" \
   -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
-  ttionya/vaultwarden-backup:"${vaultwarden_backup_version}"
+  ttionya/vaultwarden-backup@"${ttionya_vaultwarden_backup_container_hash}"
 
 echo "Downloading the restore_backup.sh script"
 restore_script_path="/var/${restore_script_object_name}"
@@ -106,8 +106,7 @@ curl -fsS --retry 5 -H "Authorization: Bearer $(get_token)" \
   "https://storage.googleapis.com/storage/v1/b/${restore_script_bucket_name}/o/${restore_script_object_name}?alt=media" \
   -o "$restore_script_path"
 
-sed -i "s/VAULTWARDEN_BACKUP_VERSION=\"\"/VAULTWARDEN_BACKUP_VERSION=\"${vaultwarden_backup_version}\"/g" "$restore_script_path"
-bash -n "$restore_script_path"
+sed -i "s|^VAULTWARDEN_BACKUP_CONTAINER_HASH=.*|VAULTWARDEN_BACKUP_CONTAINER_HASH=\"${ttionya_vaultwarden_backup_container_hash}\"|g" "$restore_script_path"
 chmod +x "$restore_script_path" # '/var' mount is noexec, so this is kinda useless?
 
 echo "All done, have a good flight"

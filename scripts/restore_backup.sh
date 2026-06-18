@@ -56,7 +56,7 @@ fi
 
 BACKUP_FILE="$1"
 CONFIRM="${CONFIRM:-}"
-VAULTWARDEN_BACKUP_VERSION="" # This is set with a 'sed' command in the VM startup script
+VAULTWARDEN_BACKUP_CONTAINER_HASH="" # This is set with a 'sed' command in the VM startup script
 
 if [[ "$CONFIRM" != "restore" ]]; then
   echo "Error: Refusing to restore without CONFIRM=restore"
@@ -75,7 +75,7 @@ docker run --rm \
   --entrypoint rclone \
   -v /var/vaultwarden-backup/rclone.conf:/config/rclone/rclone.conf:ro \
   -v /var/vaultwarden/restore:/restore \
-  ttionya/vaultwarden-backup:"${VAULTWARDEN_BACKUP_VERSION:-1.26.10}" \
+  ttionya/vaultwarden-backup@"${VAULTWARDEN_BACKUP_CONTAINER_HASH}" \
   copy \
   "CloudflareR2:/$R2_BUCKET/$BACKUP_FILE" \
   /restore
@@ -95,7 +95,7 @@ docker run --rm -it \
   -v /var/vaultwarden/data:/data \
   -v /var/vaultwarden/restore:/bitwarden/restore \
   -e DATA_DIR="/data" \
-  ttionya/vaultwarden-backup:"${VAULTWARDEN_BACKUP_VERSION:-1.26.10}" \
+  ttionya/vaultwarden-backup@"${VAULTWARDEN_BACKUP_CONTAINER_HASH}" \
   restore \
   --force-restore \
   --zip-file "$BACKUP_FILE"

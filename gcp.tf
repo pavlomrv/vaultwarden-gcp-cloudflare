@@ -73,16 +73,16 @@ resource "google_compute_instance" "vault_vm" {
 
   # Docker startup execution
   metadata_startup_script = templatefile("${path.module}/scripts/instance_startup.sh.tftpl", {
-    vaultwarden_server_version = var.vaultwarden_server_version
-    cloudflared_version        = var.cloudflare_cloudflared_version
-    vaultwarden_backup_version = var.ttionya_vaultwarden_backup_version
-    cf_account_id              = var.cf_account_id
-    backup_bucket_name         = cloudflare_r2_bucket.vault_backup_bucket.name
-    backup_cron                = var.vw_backup_cron
-    backup_keep_days           = var.vw_backup_keep_days
-    gcp_project_id             = var.gcp_project_id
-    restore_script_bucket_name = google_storage_bucket.restore_script_bucket.name
-    restore_script_object_name = google_storage_bucket_object.restore_backup_script.name
+    vaultwarden_server_container_hash         = var.vaultwarden_server_container_hash
+    cloudflare_cloudflared_container_hash     = var.cloudflare_cloudflared_container_hash
+    ttionya_vaultwarden_backup_container_hash = var.ttionya_vaultwarden_backup_container_hash
+    cf_account_id                             = var.cf_account_id
+    backup_bucket_name                        = cloudflare_r2_bucket.vault_backup_bucket.name
+    backup_cron                               = var.vw_backup_cron
+    backup_keep_days                          = var.vw_backup_keep_days
+    gcp_project_id                            = var.gcp_project_id
+    restore_script_bucket_name                = google_storage_bucket.restore_script_bucket.name
+    restore_script_object_name                = google_storage_bucket_object.restore_backup_script.name
   })
 }
 
