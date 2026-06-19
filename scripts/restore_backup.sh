@@ -58,6 +58,12 @@ BACKUP_FILE="$1"
 CONFIRM="${CONFIRM:-}"
 VAULTWARDEN_BACKUP_CONTAINER_HASH="" # This is set with a 'sed' command in the VM startup script
 
+# Check if VAULTWARDEN_BACKUP_CONTAINER_HASH was ACTUALLY set
+if [[ -z "${VAULTWARDEN_BACKUP_CONTAINER_HASH:-}" ]]; then
+    echo "⚠️  WARNING: Container hash was not injected by the startup script."
+    read -rp "Enter the container hash (sha256:...): " VAULTWARDEN_BACKUP_CONTAINER_HASH
+fi
+
 if [[ "$CONFIRM" != "restore" ]]; then
   echo "Error: Refusing to restore without CONFIRM=restore"
   show_usage
