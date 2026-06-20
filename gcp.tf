@@ -52,6 +52,7 @@ resource "google_compute_instance" "vault_vm" {
       # Ephemeral public IP
       # Justification: Utilizing an ephemeral IP for outbound Cloudflare Tunnel connectivity to avoid Cloud NAT costs.
       # All inbound ingress is blocked via the GCP firewall.
+      network_tier = "STANDARD"
     }
   }
 
@@ -85,14 +86,16 @@ resource "google_compute_instance" "vault_vm" {
     restore_script_object_name                = google_storage_bucket_object.restore_backup_script.name
   })
 
-  # Security features
+  # Security features and monitoring
   shielded_instance_config {
     enable_secure_boot          = true
     enable_vtpm                 = true
     enable_integrity_monitoring = true
   }
   metadata = {
-    enable-oslogin = "TRUE"
+    enable-oslogin              = "true"
+    "google-monitoring-enabled" = "true"
+    "google-logging-enabled"    = "true"
   }
 }
 
