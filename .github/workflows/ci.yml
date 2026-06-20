@@ -33,7 +33,6 @@ jobs:
       - name: Terraform Format Check
         id: fmt
         run: terraform fmt -check -recursive
-        continue-on-error: true # Will flag format issues but won't hard-fail the run
 
       - name: Terraform Init (Local Only)
         run: terraform init -backend=false
