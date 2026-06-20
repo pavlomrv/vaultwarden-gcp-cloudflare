@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -Eeuo pipefail
-set +x 2>/dev/null # Disable command tracing, just in case
+set +x 2>/dev/null # Disable command tracing just in case
 
 docker network inspect vaultwarden-net >/dev/null 2>&1 || \
     docker network create vaultwarden-net # Create network if it doesn't exist
@@ -107,6 +107,6 @@ curl -fsS --retry 5 -H "Authorization: Bearer $(get_token)" \
   -o "$restore_script_path"
 
 sed -i "s|^VAULTWARDEN_BACKUP_CONTAINER_HASH=.*|VAULTWARDEN_BACKUP_CONTAINER_HASH=\"${ttionya_vaultwarden_backup_container_hash}\"|g" "$restore_script_path"
-chmod +x "$restore_script_path" # '/var' mount is noexec, so this is kinda useless?
+chmod +x "$restore_script_path" # Note: Since the /var mount is noexec, this permission is not directly executable
 
 echo "All done, have a good flight"

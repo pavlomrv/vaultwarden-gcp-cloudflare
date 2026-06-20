@@ -24,7 +24,7 @@ variable "tfstate_bucket_name" {
   type = string
 }
 
-# -------- Terraform state storage bucket
+# --- Terraform State Storage Bucket ---
 resource "google_storage_bucket" "tfstate" {
   name                        = var.tfstate_bucket_name
   location                    = var.region
@@ -49,7 +49,7 @@ resource "google_storage_bucket" "tfstate" {
   }
 }
 
-# -------- IAM configuration and service accounts
+# --- IAM Configuration and Service Accounts ---
 resource "google_service_account" "terraform_state" {
   account_id   = "terraform-state"
   display_name = "Terraform state bucket access"
@@ -66,7 +66,7 @@ resource "google_service_account_iam_member" "terraform_state_impersonators" {
   role               = "roles/iam.serviceAccountTokenCreator"
 }
 
-# -------- Enable GCP services
+# --- Enable GCP Services ---
 resource "google_project_service" "compute_api" {
   project            = var.gcp_project_id
   service            = "compute.googleapis.com"
@@ -93,7 +93,7 @@ resource "google_project_service" "crm_api" {
   service            = "cloudresourcemanager.googleapis.com"
   disable_on_destroy = false
 }
-# -------- Outputs
+# --- Outputs ---
 output "backend_bucket_name" {
   description = "The exact name of the GCS bucket to use in your backend config."
   value       = google_storage_bucket.tfstate.name

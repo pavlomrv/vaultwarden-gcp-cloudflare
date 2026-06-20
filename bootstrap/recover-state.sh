@@ -89,7 +89,7 @@ TFSTATE_BUCKET="${INPUT_BUCKET:-$DEFAULT_BUCKET}"
 
 # Derived variables
 
-# SA account_id is hardcoded in bootstrap/main.tf -> google_service_account.terraform_state
+# Service Account ID is hardcoded in bootstrap/main.tf -> google_service_account.terraform_state
 STATE_SA_EMAIL="terraform-state@${PROJECT_ID}.iam.gserviceaccount.com"
 
 IMPERSONATORS=("$@")
@@ -137,7 +137,7 @@ import_if_missing() {
   fi
 }
 
-# Core Resources
+# --- Core Resources ---
 import_if_missing google_storage_bucket.tfstate "${PROJECT_ID}/${TFSTATE_BUCKET}"
 import_if_missing google_service_account.terraform_state "projects/${PROJECT_ID}/serviceAccounts/${STATE_SA_EMAIL}"
 import_if_missing google_storage_bucket_iam_member.terraform_state_object_admin \
@@ -149,7 +149,7 @@ for member in "${IMPERSONATORS[@]}"; do
     "projects/${PROJECT_ID}/serviceAccounts/${STATE_SA_EMAIL} roles/iam.serviceAccountTokenCreator ${member}"
 done
 
-# Project Services
+# --- Project Services ---
 import_if_missing google_project_service.compute_api "${PROJECT_ID}/compute.googleapis.com"
 import_if_missing google_project_service.secret_manager_api "${PROJECT_ID}/secretmanager.googleapis.com"
 import_if_missing google_project_service.iam_credentials "${PROJECT_ID}/iamcredentials.googleapis.com"

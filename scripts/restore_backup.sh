@@ -56,7 +56,7 @@ fi
 
 BACKUP_FILE="$1"
 CONFIRM="${CONFIRM:-}"
-VAULTWARDEN_BACKUP_CONTAINER_HASH="" # This is set with a 'sed' command in the VM startup script
+VAULTWARDEN_BACKUP_CONTAINER_HASH="" # Injected dynamically via sed during the VM startup process
 
 # Check if VAULTWARDEN_BACKUP_CONTAINER_HASH was successfully injected
 if [[ -z "${VAULTWARDEN_BACKUP_CONTAINER_HASH:-}" ]]; then

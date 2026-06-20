@@ -1,4 +1,4 @@
-# VaultWarden
+# --- Vaultwarden Variables ---
 variable "vw_admin_token_hash" {
   type      = string
   sensitive = true
@@ -16,7 +16,7 @@ variable "vw_backup_keep_days" {
   default = "180"
 }
 
-# GCP
+# --- GCP Configuration ---
 variable "gcp_region" {
   type    = string
   default = "us-east1"
@@ -35,7 +35,7 @@ variable "gcp_service_account" {
 }
 variable "gcp_restore_script_bucket_name" { type = string }
 
-# Cloudflare
+# --- Cloudflare Configuration ---
 variable "cf_domain" { # Cloudflare root domain (e.g., 'domain.com')
   type = string
 }
@@ -76,7 +76,7 @@ variable "cf_tunnel_name" {
   default = "vaultwarden-gcp-tunnel"
 }
 
-# Docker
+# --- Docker Configuration ---
 variable "vaultwarden_server_container_hash" {
   type    = string
   default = "sha256:d626d04934cd1192ad8ced1adb975099fca78cec33ab467d2d3c923cde7f3b0c" # 1.36.0

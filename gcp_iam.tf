@@ -1,4 +1,4 @@
-# -------- List --------
+# --- List ---
 locals {
   gcp_secrets = {
     "r2_key_id"          = google_secret_manager_secret.r2_key_id.id,
@@ -9,19 +9,19 @@ locals {
   }
 }
 
-# -------- Reader Role Update --------
+# --- Reader Role Update ---
 resource "google_service_account" "vaultwarden_vm_sa" {
   account_id   = "vaultwarden-vm-sa"
   display_name = "Vaultwarden VM Identity"
 }
 
-# -------- Allow Google Cloud Logging --------
+# --- Allow Google Cloud Logging ---
 resource "google_project_iam_member" "vm_logging" {
   project = var.gcp_project_id
   role    = "roles/logging.logWriter"
   member  = "serviceAccount:${google_service_account.vaultwarden_vm_sa.email}"
 }
-# -------- Allow Reading Each Secret --------
+# --- Allow Reading Each Secret ---
 resource "google_secret_manager_secret_iam_member" "vm_secret_access" {
   for_each  = local.gcp_secrets
   secret_id = each.value
@@ -29,14 +29,14 @@ resource "google_secret_manager_secret_iam_member" "vm_secret_access" {
   member    = "serviceAccount:${google_service_account.vaultwarden_vm_sa.email}"
 }
 
-# -------- Access to the bucket that holds the backup restore script --------
+# --- Access to the Bucket That Holds the Backup Restore Script ---
 resource "google_storage_bucket_iam_member" "vm_restore_script_viewer" {
   bucket = google_storage_bucket.restore_script_bucket.name
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:${google_service_account.vaultwarden_vm_sa.email}"
 }
 
-# -------- Secrets --------
+# --- Secrets ---
 resource "google_secret_manager_secret" "r2_key_id" {
   secret_id = "r2_key_id"
   replication {
@@ -50,7 +50,7 @@ resource "google_secret_manager_secret_version" "r2_key_id_val" {
   secret_data_wo_version = "1"
 }
 
-# --------
+# --- R2 Key Secret ---
 resource "google_secret_manager_secret" "r2_key" {
   secret_id = "r2_key"
   replication {
@@ -64,7 +64,7 @@ resource "google_secret_manager_secret_version" "r2_key_val" {
   secret_data_wo_version = "1"
 }
 
-# --------
+# --- Backup Password Secret ---
 resource "google_secret_manager_secret" "backup_pass" {
   secret_id = "backup_pass"
   replication {
@@ -78,7 +78,7 @@ resource "google_secret_manager_secret_version" "backup_pass_val" {
   secret_data_wo_version = "1"
 }
 
-# --------
+# --- Admin Token Hash Secret ---
 resource "google_secret_manager_secret" "admin_token_hash" {
   secret_id = "admin_token_hash"
   replication {
@@ -92,7 +92,7 @@ resource "google_secret_manager_secret_version" "admin_token_hash_val" {
   secret_data_wo_version = "1"
 }
 
-# --------
+# --- Vault Tunnel Token Secret ---
 resource "google_secret_manager_secret" "vault_tunnel_token" {
   secret_id = "vault_tunnel_token"
   replication {

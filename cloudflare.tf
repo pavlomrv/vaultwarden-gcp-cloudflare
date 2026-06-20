@@ -1,5 +1,5 @@
 
-# Route traffic from the domain to the Tunnel
+# Route traffic from the domain to the tunnel
 resource "cloudflare_dns_record" "vault_dns" {
   zone_id = var.cf_zone_id
   name    = var.cf_subdomain # Creates a subdomain, like 'vault.domain.com'
@@ -14,7 +14,7 @@ resource "random_id" "tunnel_secret" {
   byte_length = 35
 }
 
-# Create the Cloudflare Tunnel
+# Create the Cloudflare tunnel
 resource "cloudflare_zero_trust_tunnel_cloudflared" "vault_tunnel" {
   account_id    = var.cf_account_id
   name          = var.cf_tunnel_name
@@ -22,7 +22,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared" "vault_tunnel" {
   config_src    = "cloudflare"
 }
 
-# Configure Tunnel Routing (Points to the internal Docker container)
+# Configure tunnel routing (points to the internal Docker container)
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vault_tunnel_config" {
   account_id = var.cf_account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.vault_tunnel.id
@@ -31,7 +31,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vault_tunnel_config"
     ingress = [
       {
         hostname = "${var.cf_subdomain}.${var.cf_domain}" # e.g. 'vault.domain.com'
-        service  = "http://vaultwarden:80"                # Routes to vaultwarden container
+        service  = "http://vaultwarden:80"                # Routes to the Vaultwarden container
 
         origin_request = {
           connect_timeout          = 30
@@ -48,7 +48,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vault_tunnel_config"
   }
 }
 
-# Create the Cloudflare R2 Bucket for backups
+# Create the Cloudflare R2 bucket for backups
 resource "cloudflare_r2_bucket" "vault_backup_bucket" {
   account_id = var.cf_account_id
   name       = var.cf_r2_backup_bucket_name
@@ -63,14 +63,14 @@ resource "cloudflare_zone_setting" "ssl_settings" {
   value      = "strict"
 }
 
-# Enforce "Always Use HTTPS" (Automatic 301 redirects)
+# Enforce "Always Use HTTPS" (automatic 301 redirects)
 resource "cloudflare_zone_setting" "always_use_https_setting" {
   zone_id    = var.cf_zone_id
   setting_id = "always_use_https"
   value      = "on"
 }
 
-# Enforce a Minimum TLS version of 1.2
+# Enforce a minimum TLS version of 1.2
 resource "cloudflare_zone_setting" "min_tls_setting" {
   zone_id    = var.cf_zone_id
   setting_id = "min_tls_version"
@@ -92,9 +92,9 @@ resource "cloudflare_ruleset" "waf_login_rate_limit" {
     expression = "(http.request.method eq \"POST\" and (http.request.uri.path eq \"/identity/connect/token\" or http.request.uri.path eq \"/api/accounts/prelogin\"))"
     ratelimit = {
       characteristics     = ["cf.colo.id", "ip.src"] # Tracks requests by source IP
-      period              = 10                       # Rolling 10 seconds window (Free tier limit)
+      period              = 10                       # Rolling 10-second window (free tier limit)
       requests_per_period = 3                        # Allow 3 requests per window
-      mitigation_timeout  = 10                       # Block for 10 seconds if exceeded (Free tier limit)
+      mitigation_timeout  = 10                       # Block for 10 seconds if exceeded (free tier limit)
     }
   }]
 }
