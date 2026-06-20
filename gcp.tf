@@ -60,12 +60,6 @@ resource "google_compute_instance" "vault_vm" {
     scopes = ["cloud-platform"]
   }
 
-  shielded_instance_config {
-    enable_secure_boot          = true
-    enable_vtpm                 = true
-    enable_integrity_monitoring = true
-  }
-
   depends_on = [
     google_secret_manager_secret_iam_member.vm_secret_access,
     cloudflare_zero_trust_tunnel_cloudflared.vault_tunnel,
@@ -90,6 +84,16 @@ resource "google_compute_instance" "vault_vm" {
     restore_script_bucket_name                = google_storage_bucket.restore_script_bucket.name
     restore_script_object_name                = google_storage_bucket_object.restore_backup_script.name
   })
+
+  # Security features
+  shielded_instance_config {
+    enable_secure_boot          = true
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
+  }
+  metadata = {
+    enable-oslogin = "TRUE"
+  }
 }
 
 # Bucket that holds the 'restore backup' script
