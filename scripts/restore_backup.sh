@@ -58,7 +58,7 @@ BACKUP_FILE="$1"
 CONFIRM="${CONFIRM:-}"
 VAULTWARDEN_BACKUP_CONTAINER_HASH="" # This is set with a 'sed' command in the VM startup script
 
-# Check if VAULTWARDEN_BACKUP_CONTAINER_HASH was ACTUALLY set
+# Check if VAULTWARDEN_BACKUP_CONTAINER_HASH was successfully injected
 if [[ -z "${VAULTWARDEN_BACKUP_CONTAINER_HASH:-}" ]]; then
     echo "⚠️  WARNING: Container hash was not injected by the startup script."
     read -rp "Enter the container hash (sha256:...): " VAULTWARDEN_BACKUP_CONTAINER_HASH
@@ -94,7 +94,7 @@ timestamp=$(date +%Y%m%d-%H%M%S)
 tar -C /var/vaultwarden \
   -czf "/var/vaultwarden/pre-restore-$timestamp.tgz" \
   data
-echo "Pre restore saved at: '/var/vaultwarden/pre-restore-$timestamp.tgz'"
+echo "Pre-restore snapshot saved at: '/var/vaultwarden/pre-restore-$timestamp.tgz'"
 
 echo "Restoring backup..."
 docker run --rm -it \

@@ -53,10 +53,10 @@ resource "cloudflare_r2_bucket" "vault_backup_bucket" {
   account_id = var.cf_account_id
   name       = var.cf_r2_backup_bucket_name
   location   = var.cf_r2_location
-  lifecycle { prevent_destroy = true } # Its backup, would be cringe to lose it like this
+  lifecycle { prevent_destroy = true } # It's backup, would be cringe to lose it like this
 }
 
-# Enforce SSL Mode to "Full"
+# Enforce SSL Mode "Full" (Strict)
 resource "cloudflare_zone_setting" "ssl_settings" {
   zone_id    = var.cf_zone_id
   setting_id = "ssl"

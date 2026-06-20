@@ -1,4 +1,4 @@
-# Get Cloudflare tunnel id
+# Get Cloudflare tunnel ID
 data "cloudflare_zero_trust_tunnel_cloudflared_token" "vault_tunnel" {
   account_id = cloudflare_zero_trust_tunnel_cloudflared.vault_tunnel.account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.vault_tunnel.id
@@ -17,7 +17,7 @@ resource "google_compute_firewall" "allow_ssh_iap" {
   target_tags   = ["vaultwarden-server"]
 }
 
-# Firewall deny all
+# Firewall rule to deny all inbound (ingress) traffic
 resource "google_compute_firewall" "deny_all_ingress" {
   name     = "vaultwarden-deny-ingress"
   network  = "default"
@@ -50,8 +50,8 @@ resource "google_compute_instance" "vault_vm" {
     # trivy:ignore:AVD-GCP-0031
     access_config {
       # Ephemeral public IP
-      # Justification: Utilizing ephemeral IP for outbound Cloudflare Tunnel connectivity
-      # to avoid Cloud NAT costs. All inbound ingress is blocked via GCP firewall.
+      # Justification: Utilizing an ephemeral IP for outbound Cloudflare Tunnel connectivity to avoid Cloud NAT costs.
+      # All inbound ingress is blocked via the GCP firewall.
     }
   }
 
@@ -94,7 +94,7 @@ resource "google_storage_bucket" "restore_script_bucket" {
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"
 }
-# and we upload the script to the bucket
+# Upload the restore script to the bucket
 resource "google_storage_bucket_object" "restore_backup_script" {
   name   = "restore_backup.sh"
   source = "${path.module}/scripts/restore_backup.sh"

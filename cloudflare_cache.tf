@@ -12,7 +12,7 @@ resource "cloudflare_ruleset" "vaultwarden_cache" {
     action      = "set_cache_settings"
     enabled     = true
 
-    # 'action_parameters' also requires an equals sign and an object
+    # Configure action parameters for edge/browser TTL
     action_parameters = {
       cache = true
       # Edge TTL (How long Cloudflare's servers keep the files)

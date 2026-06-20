@@ -36,10 +36,10 @@ variable "gcp_service_account" {
 variable "gcp_restore_script_bucket_name" { type = string }
 
 # Cloudflare
-variable "cf_domain" { # 'domain.com'
+variable "cf_domain" { # Cloudflare root domain (e.g., 'domain.com')
   type = string
 }
-variable "cf_subdomain" { # basically a subdomain, like 'vault in 'vault.domain.com'
+variable "cf_subdomain" { # The subdomain prefix (e.g., 'vault' for 'vault.domain.com')
   type = string
 }
 variable "cf_api_token" {
@@ -68,7 +68,7 @@ variable "cf_r2_backup_bucket_name" {
 }
 variable "cf_r2_location" {
   type        = string
-  description = "Cloudflare R2 bucket location hint. Note that free tier is limited to several locations"
+  description = "Cloudflare R2 bucket location hint. Note that the free tier is limited to specific locations."
   default     = "enam" # Eastern North America
 }
 variable "cf_tunnel_name" {

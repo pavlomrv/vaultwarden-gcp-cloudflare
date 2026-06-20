@@ -103,7 +103,7 @@ for member in ${IMPERSONATORS[@]+"${IMPERSONATORS[@]}"}; do
 done
 members_hcl="${members_hcl}]"
 
-# tsfvars
+# Export environment variables for Terraform
 export TF_VAR_gcp_project_id="$PROJECT_ID"
 export TF_VAR_tfstate_bucket_name="$TFSTATE_BUCKET"
 export TF_VAR_terraform_state_impersonators="$members_hcl"

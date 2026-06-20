@@ -4,9 +4,9 @@ set -Eeuo pipefail
 set +x 2>/dev/null # Disable command tracing, just in case
 
 docker network inspect vaultwarden-net >/dev/null 2>&1 || \
-    docker network create vaultwarden-net # Create network if it doesnt exist
+    docker network create vaultwarden-net # Create network if it doesn't exist
 
-# Get secret routines
+# Helper functions to retrieve secrets from Secret Manager
 get_token() {
   curl -sf -H "Metadata-Flavor: Google" \
     "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \
@@ -44,7 +44,7 @@ require_secret() {
 mkdir -p /var/vaultwarden/data
 docker stop vaultwarden 2>/dev/null || true
 docker rm -f vaultwarden 2>/dev/null || true
-# Add  "-e DISABLE_ICON_DOWNLOAD=true \" in case you need to disable icons to save traffic
+# Add "-e DISABLE_ICON_DOWNLOAD=true \" to disable icons and conserve bandwidth.
 docker run -d \
   --name vaultwarden \
   --restart always \
@@ -57,7 +57,7 @@ docker run -d \
   -e ADMIN_TOKEN="$(require_secret admin_token_hash)" \
   vaultwarden/server@"${vaultwarden_server_container_hash}"
 
-# Launch Cloudflare Tunnel (Connects out to CF, routes to vaultwarden container)
+# Launch Cloudflare Tunnel (connects to Cloudflare and routes traffic to the Vaultwarden container)
 docker stop cloudflared 2>/dev/null || true
 docker rm -f cloudflared 2>/dev/null || true
 docker run -d \
@@ -66,7 +66,7 @@ docker run -d \
   --network vaultwarden-net \
   cloudflare/cloudflared@${cloudflare_cloudflared_container_hash} tunnel --no-autoupdate run --token "$(require_secret vault_tunnel_token)"
 
-# rclone config for backup container
+# Generate Rclone configuration for the backup container
 mkdir -p /var/vaultwarden-backup
 mount -t tmpfs -o size=1M tmpfs /var/vaultwarden-backup
 touch /var/vaultwarden-backup/rclone.conf

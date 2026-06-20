@@ -24,7 +24,7 @@ variable "tfstate_bucket_name" {
   type = string
 }
 
-# -------- tfstate bucket
+# -------- Terraform state storage bucket
 resource "google_storage_bucket" "tfstate" {
   name                        = var.tfstate_bucket_name
   location                    = var.region
@@ -49,7 +49,7 @@ resource "google_storage_bucket" "tfstate" {
   }
 }
 
-# -------- IAM stuff
+# -------- IAM configuration and service accounts
 resource "google_service_account" "terraform_state" {
   account_id   = "terraform-state"
   display_name = "Terraform state bucket access"

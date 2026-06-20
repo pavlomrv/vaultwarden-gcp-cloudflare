@@ -18,7 +18,7 @@ terraform {
   backend "gcs" {
     bucket                      = "vaultwarden-tfstate"
     prefix                      = "terraform/state"
-    impersonate_service_account = "" # is in backend-config file
+    impersonate_service_account = "" # Configured in the backend.config file
   }
 }
 
