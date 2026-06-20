@@ -82,11 +82,11 @@ variable "cf_r2_key" {
 }
 variable "cf_r2_backup_bucket_name" {
   type        = string
-  description = "Cloudflare R2 bucket name used for Vaultwarden backups."
+  description = "The Cloudflare R2 bucket name used for Vaultwarden backups."
 }
 variable "cf_r2_location" {
   type        = string
-  description = "Cloudflare R2 bucket location hint. Note that the free tier is limited to specific locations."
+  description = "The Cloudflare R2 bucket location. Note that the free tier is limited to specific locations."
   default     = "enam" # Eastern North America
 }
 variable "cf_tunnel_name" {

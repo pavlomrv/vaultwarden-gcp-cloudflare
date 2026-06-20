@@ -17,7 +17,7 @@ provider "google" {
 # --- Required Variables ---
 variable "gcp_project_id" {
   type        = string
-  description = "The ID of the Google Cloud Project where resources will be created. Hopefully the same one as for the main deployment."
+  description = "The ID of the Google Cloud Project where resources will be created. This should match the project ID used in the main deployment."
 }
 
 variable "terraform_state_impersonators" {
@@ -33,7 +33,7 @@ variable "region" {
 
 variable "tfstate_bucket_name" {
   type        = string
-  description = "The name of the Google Cloud Storage bucket used to store Terraform state. Should be unique"
+  description = "The name of the Google Cloud Storage bucket used to store Terraform state. This must be globally unique."
 }
 
 # --- Terraform State Storage Bucket ---
