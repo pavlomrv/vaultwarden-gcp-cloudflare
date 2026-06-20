@@ -40,6 +40,14 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
+      - name: Terraform Init Bootstrap (Local Only)
+        working-directory: ./bootstrap
+        run: terraform init -backend=false
+
+      - name: Terraform Validate Bootstrap
+        working-directory: ./bootstrap
+        run: terraform validate
+
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v4
 
@@ -62,5 +70,5 @@ jobs:
           uses: aquasecurity/trivy-action@v0.36.0
           with:
             scan-type: 'config'
-            severity: 'HIGH,CRITICAL'
+            severity: 'HIGH,CRITICAL,MEDIUM,LOW,UNKNOWN'
             exit-code: '1' # Gracefully blocks the PR if severe flaws are found
