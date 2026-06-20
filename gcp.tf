@@ -60,6 +60,12 @@ resource "google_compute_instance" "vault_vm" {
     scopes = ["cloud-platform"]
   }
 
+  shielded_instance_config {
+    enable_secure_boot          = true
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
+  }
+
   depends_on = [
     google_secret_manager_secret_iam_member.vm_secret_access,
     cloudflare_zero_trust_tunnel_cloudflared.vault_tunnel,
