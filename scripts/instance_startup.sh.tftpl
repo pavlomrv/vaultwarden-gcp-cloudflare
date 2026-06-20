@@ -109,4 +109,8 @@ curl -fsS --retry 5 -H "Authorization: Bearer $(get_token)" \
 sed -i "s|^VAULTWARDEN_BACKUP_CONTAINER_HASH=.*|VAULTWARDEN_BACKUP_CONTAINER_HASH=\"${ttionya_vaultwarden_backup_container_hash}\"|g" "$restore_script_path"
 chmod +x "$restore_script_path" # Note: Since the /var mount is noexec, this permission is not directly executable
 
+# Add monitoring. Since this is a 1 GB instance, it is a good idea to keep an eye on memory consumption
+echo "Installing Google Cloud Ops Agent"
+curl -sS https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh | bash -s -- --also-install
+
 echo "All done, have a good flight"

@@ -21,6 +21,12 @@ resource "google_project_iam_member" "vm_logging" {
   role    = "roles/logging.logWriter"
   member  = "serviceAccount:${google_service_account.vaultwarden_vm_sa.email}"
 }
+# --- Allow Google Cloud Metrics ---
+resource "google_project_iam_member" "vm_metrics" {
+  project = var.gcp_project_id
+  role    = "roles/monitoring.metricWriter"
+  member  = "serviceAccount:${google_service_account.vaultwarden_vm_sa.email}"
+}
 # --- Allow Reading Each Secret ---
 resource "google_secret_manager_secret_iam_member" "vm_secret_access" {
   for_each  = local.gcp_secrets
