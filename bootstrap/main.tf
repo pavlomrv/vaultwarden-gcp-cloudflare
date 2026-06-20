@@ -14,14 +14,26 @@ provider "google" {
   region  = var.region
 }
 
-variable "gcp_project_id" { type = string }
-variable "terraform_state_impersonators" { type = set(string) }
-variable "region" {
-  type    = string
-  default = "us-east1"
+# --- Required Variables ---
+variable "gcp_project_id" {
+  type        = string
+  description = "The ID of the Google Cloud Project where resources will be created. Hopefully the same one as for the main deployment."
 }
+
+variable "terraform_state_impersonators" {
+  type        = set(string)
+  description = "A list of service accounts or user emails authorized to impersonate the Terraform state service account."
+}
+
+variable "region" {
+  type        = string
+  description = "The Google Cloud region to deploy resources into."
+  default     = "us-east1"
+}
+
 variable "tfstate_bucket_name" {
-  type = string
+  type        = string
+  description = "The name of the Google Cloud Storage bucket used to store Terraform state. Should be unique"
 }
 
 # --- Terraform State Storage Bucket ---
