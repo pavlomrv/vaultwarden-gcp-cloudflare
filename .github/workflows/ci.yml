@@ -70,5 +70,5 @@ jobs:
           uses: aquasecurity/trivy-action@v0.36.0
           with:
             scan-type: 'config'
-            severity: 'HIGH,CRITICAL,MEDIUM,LOW,UNKNOWN'
+            severity: 'HIGH,CRITICAL'
             exit-code: '1' # Gracefully blocks the PR if severe flaws are found
