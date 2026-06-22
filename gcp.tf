@@ -26,6 +26,7 @@ resource "google_compute_firewall" "deny_all_ingress" {
     protocol = "all"
   }
   source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["vaultwarden-server"]
 }
 
 # Free Tier VM
@@ -34,7 +35,7 @@ resource "google_compute_instance" "vault_vm" {
   machine_type = "e2-micro"
   zone         = var.gcp_zone
 
-  tags = ["vaultwarden-server"]
+  tags = ["vaultwarden-server"] # for attaching firewall rules
 
   boot_disk {
     initialize_params {
