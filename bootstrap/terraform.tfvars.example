@@ -1,0 +1,19 @@
+# --- GCP Configuration ---
+# The ID of the Google Cloud Project where resources will be created. 
+# This should match the project ID used in the main deployment.
+gcp_project_id = "your-gcp-project-id"
+
+# Optional: The Google Cloud region to deploy resources into. Default: "us-east1"
+# region = "us-east1"
+
+
+# --- State Storage Configuration ---
+# The name of the Google Cloud Storage bucket used to store Terraform state. 
+# This must be globally unique.
+tfstate_bucket_name = "your-globally-unique-tfstate-bucket"
+
+# A list of service accounts or user emails authorized to impersonate the Terraform state service account.
+# Format: "user:email@example.com" or "serviceAccount:sa-name@project.iam.gserviceaccount.com"
+terraform_state_impersonators = [
+  "user:your-email@example.com"
+]

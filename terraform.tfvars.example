@@ -1,0 +1,73 @@
+# --- Vaultwarden Variables ---
+# The hashed admin token used for authenticating to the Vaultwarden admin panel.
+# Generate using: echo -n "your_password" | argon2 $(openssl rand -hex 32) -e -id -k 65540 -t 3 -p 4
+vw_admin_token_hash = "your_argon2_hashed_admin_password"
+
+# The password used to encrypt the Vaultwarden SQLite database backups.
+vw_backup_password = "your_secure_backup_password"
+
+# Optional: The cron expression defining the schedule for Vaultwarden database backups. Default: "0 0 * * *"
+# vw_backup_cron = "0 0 * * *"
+
+# Optional: The number of days to retain Vaultwarden database backups. Default: "180"
+# vw_backup_keep_days = "180"
+
+
+# --- GCP Configuration ---
+# The ID of the GCP project where the infrastructure will be created.
+gcp_project_id = "your-gcp-project-id"
+
+# The GCP service account used for provisioning or running the application.
+gcp_service_account = "terraform-service-account@your-gcp-project-id.iam.gserviceaccount.com"
+
+# The name of the GCS bucket storing the Vaultwarden database restore script.
+gcp_restore_script_bucket_name = "your-gcp-restore-script-bucket"
+
+# Optional: The default GCP region where resources will be provisioned. Default: "us-east1"
+# gcp_region = "us-east1"
+
+# Optional: The GCP zone where compute resources, such as VMs, will be deployed. Default: "us-east1-b"
+# gcp_zone = "us-east1-b"
+
+
+# --- Cloudflare Configuration ---
+# The Cloudflare root domain name (e.g., 'domain.com').
+cf_domain = "example.com"
+
+# The subdomain prefix for the Vaultwarden instance (e.g., 'vault' for 'vault.example.com').
+cf_subdomain = "vault"
+
+# The Cloudflare API token used to manage DNS records and resources.
+cf_api_token = "your_cloudflare_api_token"
+
+# The Cloudflare account ID.
+cf_account_id = "your_cloudflare_account_id"
+
+# The Cloudflare zone ID corresponding to the root domain.
+cf_zone_id = "your_cloudflare_zone_id"
+
+# The Cloudflare R2 access key ID for interacting with R2 buckets.
+cf_r2_key_id = "your_cloudflare_r2_access_key_id"
+
+# The Cloudflare R2 secret access key.
+cf_r2_key = "your_cloudflare_r2_secret_access_key"
+
+# The Cloudflare R2 bucket name used for Vaultwarden backups.
+cf_r2_backup_bucket_name = "your-cloudflare-r2-backup-bucket"
+
+# Optional: The Cloudflare R2 bucket location. Default: "enam"
+# cf_r2_location = "enam"
+
+# Optional: The name of the Cloudflare Tunnel used to securely expose the Vaultwarden instance. Default: "vaultwarden-gcp-tunnel"
+# cf_tunnel_name = "vaultwarden-gcp-tunnel"
+
+
+# --- Docker Configuration ---
+# Optional: The specific image hash for the Vaultwarden server container.
+# vaultwarden_server_container_hash = "sha256:d626d04934cd1192ad8ced1adb975099fca78cec33ab467d2d3c923cde7f3b0c"
+
+# Optional: The specific image hash for the Cloudflare cloudflared container.
+# cloudflare_cloudflared_container_hash = "sha256:6d91c121b803126f7a5344005d17a9324788fc09d305b6e2560ec6040a7ae283"
+
+# Optional: The specific image hash for the Vaultwarden backup container.
+# ttionya_vaultwarden_backup_container_hash = "sha256:0393b16f850889c1ee509e5734110c06db812ad2e583b52aa1bce16c986e03a5"

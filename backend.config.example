@@ -1,0 +1,10 @@
+# The exact service account email to use for backend impersonation.
+# You can obtain this value from the `backend_impersonate_service_account` output 
+# after applying the bootstrap module.
+impersonate_service_account = "terraform-state@your-gcp-project-id.iam.gserviceaccount.com"
+
+# The name of the GCS bucket to store the state.
+# You can obtain this value from the `backend_bucket_name` output of the bootstrap module.
+# Note: If this is hardcoded in the root main.tf backend "gcs" block, you only need
+# impersonate_service_account here. If not, uncomment and set the bucket name here.
+# bucket = "your-globally-unique-tfstate-bucket"
