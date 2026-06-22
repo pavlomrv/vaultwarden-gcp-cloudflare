@@ -40,6 +40,12 @@ require_secret() {
   exit 1
 }
 
+ADMIN_TOKEN_HASH="$(require_secret admin_token_hash)"
+VAULT_TUNNEL_TOKEN="$(require_secret vault_tunnel_token)"
+BACKUP_PASS="$(require_secret backup_pass)"
+R2_KEY_ID="$(require_secret r2_key_id)"
+R2_KEY="$(require_secret r2_key)"
+
 # Launch Vaultwarden
 mkdir -p /var/vaultwarden/data
 docker stop vaultwarden 2>/dev/null || true
@@ -54,7 +60,7 @@ docker run -d \
   -e WEBSOCKET_ENABLED=true \
   -e ICON_SERVICE=internal \
   -e ICON_CACHE_TTL=2592000 \
-  -e ADMIN_TOKEN="$(require_secret admin_token_hash)" \
+  -e ADMIN_TOKEN="$ADMIN_TOKEN_HASH" \
   vaultwarden/server@"${vaultwarden_server_container_hash}"
 
 # Launch Cloudflare Tunnel (connects to Cloudflare and routes traffic to the Vaultwarden container)
@@ -64,7 +70,7 @@ docker run -d \
   --name cloudflared \
   --restart always \
   --network vaultwarden-net \
-  cloudflare/cloudflared@${cloudflare_cloudflared_container_hash} tunnel --no-autoupdate run --token "$(require_secret vault_tunnel_token)"
+  cloudflare/cloudflared@${cloudflare_cloudflared_container_hash} tunnel --no-autoupdate run --token "$VAULT_TUNNEL_TOKEN"
 
 # Generate Rclone configuration for the backup container
 mkdir -p /var/vaultwarden-backup
@@ -75,8 +81,8 @@ cat << EOF > /var/vaultwarden-backup/rclone.conf
 [CloudflareR2]
 type = s3
 provider = Cloudflare
-access_key_id = $(require_secret r2_key_id)
-secret_access_key = $(require_secret r2_key)
+access_key_id = $R2_KEY_ID
+secret_access_key = $R2_KEY
 region = auto
 endpoint = https://${cf_account_id}.r2.cloudflarestorage.com
 no_check_bucket = true
@@ -96,7 +102,7 @@ docker run -d \
   -e RCLONE_REMOTE_NAME="CloudflareR2" \
   -e RCLONE_REMOTE_DIR="/${backup_bucket_name}/" \
   -e CRON="${backup_cron}" \
-  -e ZIP_PASSWORD="$(require_secret "backup_pass")" \
+  -e ZIP_PASSWORD="$BACKUP_PASS" \
   -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
   ttionya/vaultwarden-backup@"${ttionya_vaultwarden_backup_container_hash}"
 

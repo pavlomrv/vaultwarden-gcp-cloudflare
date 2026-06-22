@@ -93,7 +93,7 @@ resource "google_compute_instance" "vault_vm" {
     enable_integrity_monitoring = true
   }
   metadata = {
-    enable-oslogin              = "true"
+    "enable-oslogin"            = "true"
     "google-monitoring-enabled" = "true"
     "google-logging-enabled"    = "true"
   }
