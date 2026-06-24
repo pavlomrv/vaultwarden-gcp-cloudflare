@@ -64,7 +64,7 @@ docker run -d \
   -e WEBSOCKET_ENABLED=true \
   -e ICON_SERVICE=internal \
   -e ICON_CACHE_TTL=2592000 \
-  "${vaultwarden_env_args[@]}" \
+  "$${vaultwarden_env_args[@]}" \
   vaultwarden/server@"${vaultwarden_server_container_hash}"
 
 # Launch Cloudflare Tunnel (connects to Cloudflare and routes traffic to the Vaultwarden container)
