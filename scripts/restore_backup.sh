@@ -2,6 +2,25 @@
 
 set -Eeuo pipefail
 
+failure_handler() {
+    local exit_code=$1
+    local line_no=$2
+    local failed_command=$3
+
+    echo -e "\n💥 \033[0;31m[CRITICAL ERROR]\033[0m Restore script failed!" >&2
+    echo "--------------------------------------------------" >&2
+    echo "Failed on Line: $line_no" >&2
+    echo "Failed Command: $failed_command" >&2
+    echo "Exit Status:    $exit_code" >&2
+    echo "--------------------------------------------------" >&2
+    echo "⚠️  Restore halted." >&2
+    echo "Please check your backup file (/var/vaultwarden/pre-restore-<timestamp>.tgz) and target directories." >&2
+    echo "" >&2
+
+    exit "$exit_code"
+}
+trap 'failure_handler $? $LINENO "$BASH_COMMAND"' ERR
+
 show_usage() {
   local script_name
   script_name=$(basename "$0")
