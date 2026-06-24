@@ -19,6 +19,11 @@ variable "vw_backup_keep_days" {
   description = "The number of days to retain Vaultwarden database backups."
   default     = "180"
 }
+variable "vw_admin_enabled" {
+  type        = bool
+  description = "Whether to enable the Vaultwarden '/admin' page. If true, a strong ADMIN_TOKEN environment variable must be provided to prevent unauthorized access."
+  default     = false
+}
 
 # --- GCP Configuration ---
 variable "gcp_region" {

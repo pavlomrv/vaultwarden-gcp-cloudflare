@@ -40,6 +40,10 @@ require_secret() {
   exit 1
 }
 
+vaultwarden_env_args=()
+if [[ "${vw_admin_enabled}" == "true" ]]; then
+  vaultwarden_env_args+=(-e ADMIN_TOKEN="$ADMIN_TOKEN_HASH")
+fi
 ADMIN_TOKEN_HASH="$(require_secret admin_token_hash)"
 VAULT_TUNNEL_TOKEN="$(require_secret vault_tunnel_token)"
 BACKUP_PASS="$(require_secret backup_pass)"
@@ -60,7 +64,7 @@ docker run -d \
   -e WEBSOCKET_ENABLED=true \
   -e ICON_SERVICE=internal \
   -e ICON_CACHE_TTL=2592000 \
-  -e ADMIN_TOKEN="$ADMIN_TOKEN_HASH" \
+  "${vaultwarden_env_args[@]}" \
   vaultwarden/server@"${vaultwarden_server_container_hash}"
 
 # Launch Cloudflare Tunnel (connects to Cloudflare and routes traffic to the Vaultwarden container)

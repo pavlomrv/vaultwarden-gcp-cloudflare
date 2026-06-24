@@ -12,6 +12,9 @@ vw_backup_password = "your_secure_backup_password"
 # Optional: The number of days to retain Vaultwarden database backups. Default: "180"
 # vw_backup_keep_days = "180"
 
+# Optional: Whether to enable the Vaultwarden '/admin' page. If true, a strong ADMIN_TOKEN environment variable must be provided to prevent unauthorized access. Default: false
+# Note: You will need to enable this initially to set up your first user.
+# vw_admin_enabled = false
 
 # --- GCP Configuration ---
 # The ID of the GCP project where the infrastructure will be created.
