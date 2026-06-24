@@ -16,9 +16,10 @@ terraform {
     }
   }
   backend "gcs" {
-    bucket                      = "vaultwarden-tfstate"
-    prefix                      = "terraform/state"
-    impersonate_service_account = "" # Configured in the backend.config file
+    # Deliberately left blank (partial backend configuration).
+    # Configuration parameters are pulled from your local backend.config file.
+    # Initialize using: terraform init -backend-config=backend.config
+    # See backend.config.example for setup instructions.
   }
 }
 

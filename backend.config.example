@@ -3,8 +3,12 @@
 # after applying the bootstrap module.
 impersonate_service_account = "terraform-state@your-gcp-project-id.iam.gserviceaccount.com"
 
-# The name of the GCS bucket to store the state.
+# The name of the GCS bucket where the state file will be stored.
 # You can obtain this value from the `backend_bucket_name` output of the bootstrap module.
-# Note: If this is hardcoded in the root main.tf backend "gcs" block, you only need
-# impersonate_service_account here. If not, uncomment and set the bucket name here.
-# bucket = "your-globally-unique-tfstate-bucket"
+bucket = "your-globally-unique-tfstate-bucket"
+
+# The folder path within the GCS bucket where this specific state file will live.
+# Highly recommended to isolate state files and prevent different Terraform components
+# or environments (e.g., dev vs prod) from overwriting each other.
+# Example: "vaultwarden/prod"
+prefix = "vaultwarden/prod"
