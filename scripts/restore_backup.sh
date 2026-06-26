@@ -41,7 +41,7 @@ Cloudflare R2. The script performs the following steps:
   5. Restarts all containers.
 
 USAGE:
-  CONFIRM=restore R2_BUCKET=<bucket> bash ./${script_name} [-h|--help] <backup-file.zip>
+  sudo CONFIRM=restore R2_BUCKET=<bucket> bash ./${script_name} [-h|--help] <backup-file.zip>
 
 ARGUMENTS:
   <backup-file.zip>     The exact filename of the .zip backup in R2.
@@ -57,7 +57,7 @@ PREREQUISITES:
     with a remote named 'CloudflareR2'.
 
 EXAMPLE:
-  CONFIRM=restore R2_BUCKET=my-vw-backups \\
+  sudo CONFIRM=restore R2_BUCKET=my-vw-backups \\
     bash ./${script_name} backup-20260601-000000.zip
 
 IMPORTANT WARNING:
@@ -71,6 +71,13 @@ EOF
 if [[ $# -eq 0 || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   show_usage
   exit 1
+fi
+
+if [[ $EUID -ne 0 ]]; then
+    echo -e "\n \033[0;31m[ACCESS DENIED]\033[0m This script requires administrative privileges." >&2
+    echo "Please execute this script using sudo" >&2
+    show_usage
+    exit 1
 fi
 
 BACKUP_FILE="$1"
