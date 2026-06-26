@@ -74,8 +74,7 @@ if [[ $# -eq 0 || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
 fi
 
 if [[ $EUID -ne 0 ]]; then
-    echo -e "\n \033[0;31m[ACCESS DENIED]\033[0m This script requires administrative privileges." >&2
-    echo "Please execute this script using sudo" >&2
+    echo -e "\n \033[0;31m[ACCESS DENIED]\033[0m This script requires administrative privileges. Please execute this script using sudo." >&2
     show_usage
     exit 1
 fi
