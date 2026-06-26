@@ -50,6 +50,10 @@ BACKUP_PASS="$(require_secret backup_pass)"
 R2_KEY_ID="$(require_secret r2_key_id)"
 R2_KEY="$(require_secret r2_key)"
 
+docker pull vaultwarden/server@"${vaultwarden_server_container_hash}"
+docker pull ttionya/vaultwarden-backup@"${ttionya_vaultwarden_backup_container_hash}"
+docker pull cloudflare/cloudflared@${cloudflare_cloudflared_container_hash}
+
 # Launch Vaultwarden
 mkdir -p /var/vaultwarden/data
 docker stop vaultwarden 2>/dev/null || true
