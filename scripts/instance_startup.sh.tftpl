@@ -42,9 +42,9 @@ require_secret() {
 
 vaultwarden_env_args=()
 if [[ "${vw_admin_enabled}" == "true" ]]; then
+  ADMIN_TOKEN_HASH="$(require_secret admin_token_hash)"
   vaultwarden_env_args+=(-e ADMIN_TOKEN="$${ADMIN_TOKEN_HASH:-}")
 fi
-ADMIN_TOKEN_HASH="$(require_secret admin_token_hash)"
 VAULT_TUNNEL_TOKEN="$(require_secret vault_tunnel_token)"
 BACKUP_PASS="$(require_secret backup_pass)"
 R2_KEY_ID="$(require_secret r2_key_id)"
