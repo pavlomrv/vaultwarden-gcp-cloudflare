@@ -86,6 +86,7 @@ resource "google_compute_instance" "vault_vm" {
     gcp_project_id                            = var.gcp_project_id
     restore_script_bucket_name                = google_storage_bucket.restore_script_bucket.name
     restore_script_object_name                = google_storage_bucket_object.restore_backup_script.name
+    gcp_disk_name                             = google_compute_disk.vaultwarden_data.name
   })
 
   # Security features and monitoring
@@ -99,6 +100,19 @@ resource "google_compute_instance" "vault_vm" {
     "google-monitoring-enabled" = "true"
     "google-logging-enabled"    = "true"
   }
+
+  attached_disk {
+    source      = google_compute_disk.vaultwarden_data.id
+    device_name = google_compute_disk.vaultwarden_data.name
+  }
+}
+
+# Create the secondary free-tier data disk
+resource "google_compute_disk" "vaultwarden_data" {
+  name = "vaultwarden-data-disk"
+  type = "pd-standard"
+  zone = var.gcp_zone
+  size = 15
 }
 
 # Bucket that holds the 'restore backup' script

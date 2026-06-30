@@ -54,8 +54,25 @@ docker pull vaultwarden/server@"${vaultwarden_server_container_hash}"
 docker pull ttionya/vaultwarden-backup@"${ttionya_vaultwarden_backup_container_hash}"
 docker pull cloudflare/cloudflared@${cloudflare_cloudflared_container_hash}
 
-# Launch Vaultwarden
+# Setup persistent data disk
+DATA_DISK="/dev/disk/by-id/google-${gcp_disk_name}"
 mkdir -p /var/vaultwarden/data
+if [ -b "$DATA_DISK" ]; then
+  # Check if disk has a filesystem
+  if ! blkid "$DATA_DISK" | grep -q 'TYPE='; then
+    echo "Formatting data disk as ext4..."
+    mkfs.ext4 -m 0 -F -E lazy_itable_init=0,lazy_journal_init=0,discard "$DATA_DISK"
+  fi
+  # Mount it if not already mounted
+  if ! mountpoint -q /var/vaultwarden/data; then
+    echo "Mounting data disk..."
+    mount -o discard,defaults "$DATA_DISK" /var/vaultwarden/data
+  fi
+else
+  echo "WARNING: Data disk not found: $DATA_DISK. Proceeding with boot disk storage." >&2
+fi
+
+# Launch Vaultwarden
 docker stop vaultwarden 2>/dev/null || true
 docker rm -f vaultwarden 2>/dev/null || true
 # Add "-e DISABLE_ICON_DOWNLOAD=true \" to disable icons and conserve bandwidth.
