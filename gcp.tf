@@ -40,7 +40,7 @@ resource "google_compute_instance" "vault_vm" {
   boot_disk {
     initialize_params {
       image = "cos-cloud/cos-stable"
-      size  = 30
+      size  = 15
       type  = "pd-standard"
     }
   }
@@ -113,6 +113,9 @@ resource "google_compute_disk" "vaultwarden_data" {
   type = "pd-standard"
   zone = var.gcp_zone
   size = 15
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Bucket that holds the 'restore backup' script
