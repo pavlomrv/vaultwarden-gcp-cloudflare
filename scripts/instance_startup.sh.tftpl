@@ -6,6 +6,11 @@ set +x 2>/dev/null # Disable command tracing just in case
 docker network inspect vaultwarden-net >/dev/null 2>&1 || \
     docker network create vaultwarden-net # Create network if it doesn't exist
 
+command -v jq >/dev/null || {
+  echo "Required command not found: jq" >&2
+  exit 1
+}
+
 # Helper functions to retrieve secrets from Secret Manager
 get_token() {
   curl -sf -H "Metadata-Flavor: Google" \
@@ -50,27 +55,37 @@ BACKUP_PASS="$(require_secret backup_pass)"
 R2_KEY_ID="$(require_secret r2_key_id)"
 R2_KEY="$(require_secret r2_key)"
 
+DATA_DISK_MOUNT="/var/vaultwarden/data"
+
 docker pull vaultwarden/server@"${vaultwarden_server_container_hash}"
 docker pull ttionya/vaultwarden-backup@"${ttionya_vaultwarden_backup_container_hash}"
 docker pull cloudflare/cloudflared@${cloudflare_cloudflared_container_hash}
 
 # Setup persistent data disk
 DATA_DISK="/dev/disk/by-id/google-${gcp_disk_name}"
-mkdir -p /var/vaultwarden/data
-if [ -b "$DATA_DISK" ]; then
-  # Check if disk has a filesystem
-  if ! blkid "$DATA_DISK" | grep -q 'TYPE='; then
-    echo "Formatting data disk as ext4..."
-    mkfs.ext4 -m 0 -F -E lazy_itable_init=0,lazy_journal_init=0,discard "$DATA_DISK"
-  fi
-  # Mount it if not already mounted
-  if ! mountpoint -q /var/vaultwarden/data; then
-    echo "Mounting data disk..."
-    mount -o discard,defaults "$DATA_DISK" /var/vaultwarden/data
-  fi
-else
-  echo "WARNING: Data disk not found: $DATA_DISK. Proceeding with boot disk storage." >&2
-fi
+mount_persistent_disk() {
+  mkdir -p "$DATA_DISK_MOUNT"
+  for attempt in 1 2 3 4 5; do
+    if [ -b "$DATA_DISK" ]; then
+      # Check if disk has a filesystem
+      if ! blkid "$DATA_DISK" | grep -q 'TYPE='; then
+        echo "Formatting data disk as ext4..." >&2
+        mkfs.ext4 -m 0 -F -E lazy_itable_init=0,lazy_journal_init=0,discard "$DATA_DISK"
+      fi
+      # Mount it if not already mounted
+      if ! mountpoint -q "$DATA_DISK_MOUNT"; then
+        echo "Mounting data disk..." >&2
+        mount -o discard,defaults "$DATA_DISK" "$DATA_DISK_MOUNT"
+      fi
+      return 0
+    fi
+    echo "Failed to find the data disk to attach: '$DATA_DISK'. Retry $attempt/5..." >&2
+    sleep 3
+  done
+  echo "ERROR: Data disk not found: $DATA_DISK." >&2
+  exit 1
+}
+mount_persistent_disk
 
 # Launch Vaultwarden
 docker stop vaultwarden 2>/dev/null || true
@@ -80,7 +95,7 @@ docker run -d \
   --name vaultwarden \
   --restart always \
   --network vaultwarden-net \
-  -v /var/vaultwarden/data:/data \
+  -v "$DATA_DISK_MOUNT":/data \
   -e SIGNUPS_ALLOWED=false \
   -e WEBSOCKET_ENABLED=true \
   -e ICON_SERVICE=internal \
@@ -99,7 +114,12 @@ docker run -d \
 
 # Generate Rclone configuration for the backup container
 mkdir -p /var/vaultwarden-backup
-mount -t tmpfs -o size=1M tmpfs /var/vaultwarden-backup
+if ! mountpoint -q /var/vaultwarden-backup; then
+  mount -t tmpfs -o size=1M tmpfs /var/vaultwarden-backup
+  echo "Created 1MB tmpfs for backups." >&2
+else
+  echo "Backup tmpfs is already mounted. Skipping." >&2
+fi
 touch /var/vaultwarden-backup/rclone.conf
 chmod 600 /var/vaultwarden-backup/rclone.conf
 cat << EOF > /var/vaultwarden-backup/rclone.conf
@@ -121,7 +141,7 @@ docker run -d \
   --name vaultwarden_backup \
   --restart always \
   --network vaultwarden-net \
-  -v /var/vaultwarden/data:/data:ro \
+  -v "$DATA_DISK_MOUNT":/data:ro \
   -v /var/vaultwarden-backup/rclone.conf:/config/rclone/rclone.conf:ro \
   -e DATA_DIR="/data" \
   -e RCLONE_REMOTE_NAME="CloudflareR2" \
@@ -131,7 +151,7 @@ docker run -d \
   -e BACKUP_KEEP_DAYS="${backup_keep_days}" \
   ttionya/vaultwarden-backup@"${ttionya_vaultwarden_backup_container_hash}"
 
-echo "Downloading the restore_backup.sh script"
+echo "Downloading the restore_backup.sh script" >&2
 restore_script_path="/var/${restore_script_object_name}"
 curl -fsS --retry 5 -H "Authorization: Bearer $(get_token)" \
   "https://storage.googleapis.com/storage/v1/b/${restore_script_bucket_name}/o/${restore_script_object_name}?alt=media" \
@@ -140,4 +160,4 @@ curl -fsS --retry 5 -H "Authorization: Bearer $(get_token)" \
 sed -i "s|^VAULTWARDEN_BACKUP_CONTAINER_HASH=.*|VAULTWARDEN_BACKUP_CONTAINER_HASH=\"${ttionya_vaultwarden_backup_container_hash}\"|g" "$restore_script_path"
 chmod +x "$restore_script_path" # Note: Since the /var mount is noexec, this permission is not directly executable
 
-echo "All done, have a good flight"
+echo "All done, have a good flight" >&2
