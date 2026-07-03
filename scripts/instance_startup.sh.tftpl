@@ -137,7 +137,7 @@ endpoint = https://${cf_account_id}.r2.cloudflarestorage.com
 no_check_bucket = true
 acl = private
 EOF
-chown 1000:1000 /var/vaultwarden-backup/rclone.conf
+chown 1100:1100 /var/vaultwarden-backup/rclone.conf # ttionya uses 1100 for some reason
 
 # Launch the Offsite Backup Engine
 docker stop vaultwarden_backup 2>/dev/null || true
@@ -146,7 +146,7 @@ docker run -d \
   --name vaultwarden_backup \
   --restart always \
   --network vaultwarden-net \
-  -u 1000:1000 \
+  -u 1100:1100 \
   -v "$DATA_DISK_MOUNT":/data:ro \
   -v /var/vaultwarden-backup/rclone.conf:/config/rclone/rclone.conf:ro \
   -e DATA_DIR="/data" \
