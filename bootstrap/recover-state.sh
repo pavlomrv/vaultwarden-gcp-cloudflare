@@ -12,12 +12,12 @@ show_usage() {
 Bootstrap TF State Restore Script
 
 Recreates Terraform's local state by importing existing GCP resources.
-This is useful when the remote state file is lost or corrupted and you
+This is useful when the bootstrap local state file is lost and you
 need to re-sync Terraform with infrastructure that already exists.
 It does NOT restore old state history — it creates a fresh local state.
 
 USAGE:
-  ./${script_name} [-h|--help] [IMPERSONATOR ...]
+  bash ./${script_name} [-h|--help] [IMPERSONATOR ...]
 
   Run from the bootstrap/ directory. Each IMPERSONATOR should match an
   entry in your 'terraform_state_impersonators' variable, formatted as:
@@ -45,6 +45,8 @@ IMPORTANT:
     should be empty or trivially small. If Terraform wants to destroy
     or recreate critical resources, stop and inspect before applying!
   - This script uses '-backend=false' so no remote state is touched.
+  - Pass the same impersonators you use in terraform_state_impersonators;
+    otherwise the recovery plan may want to remove missing IAM bindings.
 ----------------------------------------------------------------------
 EOF
 }
