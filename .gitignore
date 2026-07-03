@@ -4,3 +4,4 @@ terraform.tfvars
 .terraform
 .idea
 backend.config
+.DS_Store
