@@ -86,6 +86,7 @@ mount_persistent_disk() {
   exit 1
 }
 mount_persistent_disk
+chown -R 1000:1000 "$DATA_DISK_MOUNT" # vaultwarden is run with 1000 user
 
 # Launch Vaultwarden
 docker stop vaultwarden 2>/dev/null || true
@@ -95,8 +96,10 @@ docker run -d \
   --name vaultwarden \
   --restart always \
   --network vaultwarden-net \
+  -u 1000:1000 \
   -v "$DATA_DISK_MOUNT":/data \
   -e SIGNUPS_ALLOWED=false \
+  -e SHOW_PASSWORD_HINT=false \
   -e WEBSOCKET_ENABLED=true \
   -e ICON_SERVICE=internal \
   -e ICON_CACHE_TTL=2592000 \
@@ -110,6 +113,7 @@ docker run -d \
   --name cloudflared \
   --restart always \
   --network vaultwarden-net \
+  -u 1000:1000 \
   cloudflare/cloudflared@${cloudflare_cloudflared_container_hash} tunnel --no-autoupdate run --token "$VAULT_TUNNEL_TOKEN"
 
 # Generate Rclone configuration for the backup container
@@ -133,6 +137,7 @@ endpoint = https://${cf_account_id}.r2.cloudflarestorage.com
 no_check_bucket = true
 acl = private
 EOF
+chown 1000:1000 /var/vaultwarden-backup/rclone.conf
 
 # Launch the Offsite Backup Engine
 docker stop vaultwarden_backup 2>/dev/null || true
@@ -141,6 +146,7 @@ docker run -d \
   --name vaultwarden_backup \
   --restart always \
   --network vaultwarden-net \
+  -u 1000:1000 \
   -v "$DATA_DISK_MOUNT":/data:ro \
   -v /var/vaultwarden-backup/rclone.conf:/config/rclone/rclone.conf:ro \
   -e DATA_DIR="/data" \
