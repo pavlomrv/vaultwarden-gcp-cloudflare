@@ -31,7 +31,7 @@ CONFIGURATION:
 
   Environment Variables (all optional):
     PROJECT_ID        GCP project ID.
-    TFSTATE_BUCKET    Name of the GCS bucket holding Terraform state.
+    TFSTATE_BUCKET    Name of the GCS bucket holding Terraform state (for the main module).
 
 EXAMPLE:
   cd bootstrap
@@ -88,6 +88,12 @@ TFVARS_BUCKET=$(parse_tfvar "tfstate_bucket_name")
 DEFAULT_BUCKET="${TFSTATE_BUCKET:-$TFVARS_BUCKET}"
 read -r -p "Terraform State Bucket Name [${DEFAULT_BUCKET}]: " INPUT_BUCKET
 TFSTATE_BUCKET="${INPUT_BUCKET:-$DEFAULT_BUCKET}"
+
+if [[ -z "${TFSTATE_BUCKET:-}" ]]; then
+  echo "Error: TFSTATE_BUCKET is mandatory to map infrastructure assets." >&2
+  exit 1
+fi
+
 
 # Derived variables
 
