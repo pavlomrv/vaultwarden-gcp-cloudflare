@@ -86,7 +86,7 @@ resource "cloudflare_ruleset" "waf_login_rate_limit" {
 
   rules = [{
     action      = "block"
-    description = "Limit logins to 5 per minute"
+    description = "Limit logins to 3 per 10 seconds"
     enabled     = true
     # Matches the primary Vaultwarden authentication paths
     expression = "(http.request.method eq \"POST\" and (http.request.uri.path eq \"/identity/connect/token\" or http.request.uri.path eq \"/api/accounts/prelogin\"))"
