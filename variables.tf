@@ -12,7 +12,7 @@ variable "vw_backup_password" {
 variable "vw_backup_cron" {
   type        = string
   description = "The cron expression defining the schedule for Vaultwarden database backups."
-  default     = "0 0 * * *" # At 00:00 UTC
+  default     = "0 0 */2 * *" # At 00:00 UTC every other day
 }
 variable "vw_backup_keep_days" {
   type        = string
