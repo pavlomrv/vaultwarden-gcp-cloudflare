@@ -53,7 +53,7 @@ resource "google_compute_instance" "vault_vm" {
       # Ephemeral public IP
       # Justification: Utilizing an ephemeral IP for outbound Cloudflare Tunnel connectivity to avoid Cloud NAT costs.
       # All inbound ingress is blocked via the GCP firewall.
-      network_tier = "STANDARD"
+      network_tier = "PREMIUM" # Surprisingly, Google's Free Tier is 'PREMIUM'
     }
   }
 
