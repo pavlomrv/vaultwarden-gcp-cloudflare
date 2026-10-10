@@ -104,7 +104,7 @@ variable "cf_tunnel_name" {
 variable "vaultwarden_server_container_hash" {
   type        = string
   description = "The specific image hash for the Vaultwarden server container."
-  default     = "sha256:d626d04934cd1192ad8ced1adb975099fca78cec33ab467d2d3c923cde7f3b0c" # 1.36.0
+  default     = "sha256:efb3cde962015fcc036b2ea625242248611943b27212ebf4392841fb30fad055" # 1.37.4
 }
 variable "cloudflare_cloudflared_container_hash" {
   type        = string
