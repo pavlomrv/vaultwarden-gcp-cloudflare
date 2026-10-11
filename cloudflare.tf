@@ -77,6 +77,36 @@ resource "cloudflare_zone_setting" "min_tls_setting" {
   value      = "1.2"
 }
 
+# Enable HTTP Strict Transport Security
+resource "cloudflare_zone_setting" "security_header" {
+  zone_id    = var.cf_zone_id
+  setting_id = "security_header"
+  value = {
+    strict_transport_security = {
+      enabled            = true
+      max_age            = 31536000 # 1 year (recommended)
+      include_subdomains = true
+      nosniff            = true
+    }
+  }
+}
+
+# Enable Cloudflare Bot Fight Mode
+resource "cloudflare_bot_management" "bot_fight_mode" {
+  zone_id    = var.cf_zone_id
+  fight_mode = true
+  enable_js  = true
+}
+
+# Enable Cloudflare DNSSEC
+resource "cloudflare_zone_dnssec" "zone_dnssec" {
+  zone_id = var.cf_zone_id
+  status  = "active"
+}
+
+// TODO add 'Zero Trust / Access' to gate /admin
+
+# Cloudflare rate limiting
 resource "cloudflare_ruleset" "waf_login_rate_limit" {
   zone_id     = var.cf_zone_id
   name        = "Login Rate Limiting"
