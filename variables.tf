@@ -109,7 +109,7 @@ variable "vaultwarden_server_container_hash" {
 variable "cloudflare_cloudflared_container_hash" {
   type        = string
   description = "The specific image hash for the Cloudflare cloudflared container."
-  default     = "sha256:6d91c121b803126f7a5344005d17a9324788fc09d305b6e2560ec6040a7ae283" # 2026.6.1
+  default     = "sha256:85b1ec2fdc5b311d309abd268f70eef071a595f011a38bf878938af25d084d17" # 2026.10.5
 }
 variable "ttionya_vaultwarden_backup_container_hash" {
   type        = string
